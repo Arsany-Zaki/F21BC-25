@@ -1,3 +1,14 @@
+from dataclasses import dataclass
+from typing import List
+from config.activation_functions_enum import ActivationFunction
+from config.cost_functions_enum import CostFunction
+
+# Strongly-typed config for neural network
+@dataclass
+class NNConfig:
+    layer_sizes: List[int]
+    activation_functions: List[ActivationFunction]
+    error_function: CostFunction
 """
 Neural Network Forward Pass Implementation
 Contains classes for NeuralNetwork, Layer, and Neuron
@@ -6,21 +17,9 @@ Contains classes for NeuralNetwork, Layer, and Neuron
 import numpy as np
 import math
 from typing import List, Callable, Any
-from enum import Enum
+from config.activation_functions_enum import ActivationFunction
+from config.cost_functions_enum import CostFunction
 
-
-class ActivationFunction(Enum):
-    """Enumeration for activation functions"""
-    SIGMOID = "sigmoid"
-    RELU = "relu"
-    TANH = "tanh"
-    LINEAR = "linear"
-
-
-class CostFunction(Enum):
-    """Enumeration for cost functions"""
-    MEAN_SQUARED_ERROR = "mse"
-    MEAN_ABSOLUTE_ERROR = "mae"
 
 
 class Neuron:
@@ -74,8 +73,7 @@ class Neuron:
             return x
         else:
             raise ValueError(f"Unknown activation function: {self.activation_function}")
-
-
+ 
 class Layer:
     """
     Represents a layer of neurons in a neural network
@@ -111,31 +109,24 @@ class Layer:
         
         return self.outputs
 
-
 class NeuralNetwork:
     """
     Neural Network class that performs forward pass with given weights
     """
-    
-    def __init__(self, 
-                 layer_sizes: List[int], 
-                 activation_functions: List[ActivationFunction], 
-                 error_function: CostFunction):
+
+    def __init__(self, config: NNConfig):
         """
-        Initialize neural network structure
-        
+        Initialize neural network structure using NNConfig dataclass
         Args:
-            layer_sizes: List of integers specifying number of neurons in each layer
-            activation_functions: List of ActivationFunction enums for each layer
-            error_function: CostFunction enum to calculate error between predicted and actual outputs
+            config: NNConfig object containing all neural network parameters
         """
-        self.layer_sizes = layer_sizes
-        self.error_function = error_function
+        self.layer_sizes = config.layer_sizes
+        self.error_function = config.error_function
         self.layers = []
-        
+
         # Create layers (excluding input layer which is just pass-through)
-        for i in range(1, len(layer_sizes)):
-            layer = Layer(layer_sizes[i], activation_functions[i-1])
+        for i in range(1, len(config.layer_sizes)):
+            layer = Layer(config.layer_sizes[i], config.activation_functions[i-1])
             self.layers.append(layer)
     
     def forward_pass(self, 
@@ -168,6 +159,7 @@ class NeuralNetwork:
             prediction = current_inputs[0] if len(current_inputs) == 1 else current_inputs
             predictions.append(prediction)
             
+            
             # Calculate cost for this sample
             if isinstance(prediction, list):
                 cost = self._apply_cost_function(prediction, [target_output])
@@ -175,8 +167,7 @@ class NeuralNetwork:
                 cost = self._apply_cost_function([prediction], [target_output])
             
             total_cost += cost
-        
-        return total_cost
+        return total_cost / len(input_vectors)
     
     def _apply_cost_function(self, predictions: List[float], targets: List[float]) -> float:
         """Apply the cost function to predictions and targets"""

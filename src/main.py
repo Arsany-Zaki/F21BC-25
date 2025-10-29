@@ -1,7 +1,7 @@
 print("************* Program starts ************")
 
 from utils.config_manager import CONFIG
-from data_processing.prepare_input_data import DataPreparator
+from input_data_Processor.prepare_input_data import DataPreparator
 
 def main() -> None:
     """Main application entry point"""

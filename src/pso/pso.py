@@ -3,50 +3,32 @@ from dataclasses import dataclass, field
 from typing import Optional, Callable, Tuple, List
 from enum import Enum
 
-class InformantSelection(Enum):
-    STATIC_RANDOM = "static_random"
-    DYNAMIC_RANDOM = "dynamic_random"
-    SPATIAL_PROXIMITY = "spatial_proximity"
+from config.informant_selection_enum import InformantSelection
+from config.boundary_handling_enum import BoundaryHandling
 
-class BoundaryHandling(Enum):
-    CLIP = "clip"
-    REFLECT = "reflect"
 
 @dataclass
-class PSOConfig:
+class PSOParams:
     # Swarm parameters
-    swarm_size: int = 30                        
-    w_inertia: float = 0.9                      # inertia weight
-    c_personal: float = 1.4                     # personal best coefficient          
-    c_social: float = 1.4                       # social best coefficient            
-    c_global: float = 1.4                       # global best coefficient            
-    jump_size: float = 1.0                      
-    
-    # Problem parameters
-    dims: int = 2                               
-    bounds: List[Tuple[float, float]] = field(default_factory=lambda: [(-5.0, 5.0), (-5.0, 5.0)])   
-    max_iter: int = 1000                        
-    target_fitness: Optional[float] = None          
-    vel_limit: float = 0.5
+    swarm_size: int
+    w_inertia: float  # inertia weight
+    c_personal: float  # personal best coefficient
+    c_social: float  # social best coefficient
+    c_global: float  # global best coefficient
+    jump_size: float
 
-    '''
-    Boundary handling strategies:
-    - clip: clip positions to bounds 
-    - reflect: reflect particles off boundaries
-    '''
-    boundary_handling: BoundaryHandling = BoundaryHandling.CLIP                      
-    
-    '''
-    Informant selection options
-    - static_random: random informants selected once at initialization
-    - dynamic_random: random informants re-selected every iteration
-    - spatial_proximity: nearest neighbors selected every iteration based on position    
-    '''
-    informant_selection: InformantSelection = InformantSelection.STATIC_RANDOM
-    informant_count: int = 2                
+    # Problem parameters
+    dims: int
+    bounds: List[Tuple[float, float]]
+    max_iter: int
+    target_fitness: Optional[float]
+    vel_limit: float
+    boundary_handling: BoundaryHandling
+    informant_selection: InformantSelection
+    informant_count: int
     
 class PSO:
-    def __init__(self, config: PSOConfig):
+    def __init__(self, config: PSOParams):
         self.config = config
         self.rng = np.random.RandomState()
 

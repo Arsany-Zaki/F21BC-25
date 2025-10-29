@@ -2,17 +2,20 @@ import sys
 import os
 # Add src directory to Python path to import modules
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
-
-from utils.config_manager import CONFIG
+# Add config directory to Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'config'))
+from config.data_config import data as data_cfg
+from config.output_config import output as output_cfg
 from utils.path_manager import normalize_path, ensure_directory_exists, join_paths
-from data_processing.prepare_input_data import DataPreparator
+from input_data_Processor.prepare_input_data import DataPreparator
 import pandas as pd
 from datetime import datetime
 
 def test_data_preparation():
     """Test the data preparation pipeline"""
     print("************* Data Preparation Test starts ************")
-    
+    # Merge configs as expected by DataPreparator
+    CONFIG = {"data": data_cfg, "output": output_cfg}
     data_preparator = DataPreparator(CONFIG)
     data_preparator.prepare_data_for_training()
     raw_input_data = data_preparator.get_raw_input_data()

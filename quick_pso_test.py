@@ -9,7 +9,7 @@ import numpy as np
 # Add the src directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from pso.pso import PSO, PSOConfig
+from pso.pso import PSO, PSOParams
 
 
 def simple_fitness(x):
@@ -23,7 +23,7 @@ def test_pso_bounds():
     
     # Test 1: Default configuration
     print("\n1. Testing default configuration:")
-    config1 = PSOConfig()
+    config1 = PSOParams()
     pso1 = PSO(config1)
     
     print(f"   Dims: {pso1.dims}")
@@ -38,7 +38,7 @@ def test_pso_bounds():
     # Test 2: Custom dimension-specific bounds
     print("\n2. Testing dimension-specific bounds:")
     custom_bounds = [(-1.0, 1.0), (-2.0, 3.0), (0.0, 5.0)]
-    config2 = PSOConfig(
+    config2 = PSOParams(
         dims=3,
         bounds=custom_bounds,
         swarm_size=20,

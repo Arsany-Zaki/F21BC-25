@@ -1,0 +1,21 @@
+# data_config.py
+
+data = {
+    'input_data_file_path': 'data/raw_input/concrete_data.csv',
+    'columns': [
+        'cement',
+        'blast_furnace_slag',
+        'fly_ash',
+        'water',
+        'Superplasticizer',
+        'coarse_aggregate',
+        'fine_aggregate',
+        'age',
+        'concrete_compressive_strength',
+    ],
+    'random_seed': 42,
+    'split_test_size': 0.30,
+    'normalisation_method': 'zscore',
+    'normalisation_zscore_params': [0.0, 1.0],
+    'normalisation_minmax_params': [-0.1, 1.0],
+}

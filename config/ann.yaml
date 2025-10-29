@@ -1,8 +1,0 @@
-# ========== ANN CONFIG ==========
-ann:
-  hidden_layers: [8, 8]        # two hidden layers, 8 neurons each
-  activations: [relu, relu]    # one activation per hidden layer (extendable)
-  output_activation: linear    # for regression output
-
-  weight_init_method: uniform              # uniform | normal
-  weight_init_range: [-1.0, 1.0]           # range for random init
