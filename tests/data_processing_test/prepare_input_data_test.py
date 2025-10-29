@@ -1,0 +1,52 @@
+import sys
+import os
+# Add src directory to Python path to import modules
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+
+from utils.config_manager import CONFIG
+from utils.path_manager import normalize_path, ensure_directory_exists, join_paths
+from data_processing.prepare_input_data import DataPreparator
+import pandas as pd
+from datetime import datetime
+
+def test_data_preparation():
+    """Test the data preparation pipeline"""
+    print("************* Data Preparation Test starts ************")
+    
+    data_preparator = DataPreparator(CONFIG)
+    data_preparator.prepare_data_for_training()
+    raw_input_data = data_preparator.get_raw_input_data()
+    normalized_input_data = data_preparator.get_normalized_input_data()
+    training_data, testing_data = data_preparator.get_normalized_input_data_split()
+    
+    # Get current timestamp in compact form
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Save data with timestamp in filenames
+    output_dir = normalize_path(CONFIG["output"]["test_output_dir"])
+    ensure_directory_exists(output_dir)
+    
+    # Save raw data
+    path = join_paths(output_dir, f"raw_data_{timestamp}.csv")
+    raw_input_data.to_csv(path, index=False)
+    print(f"{path} is saved")
+    
+    # Save normalized data
+    path = join_paths(output_dir, f"normalized_input_data_{timestamp}.csv")
+    normalized_input_data.to_csv(path, index=False)
+    print(f"{path} is saved")
+    
+    # Save training data
+    path = join_paths(output_dir, f"training_data_{timestamp}.csv")
+    training_data.to_csv(path, index=False)
+    print(f"{path} is saved")
+    
+    # Save testing data
+    path = join_paths(output_dir, f"testing_data_{timestamp}.csv")
+    testing_data.to_csv(path, index=False)
+    print(f"{path} is saved")
+    
+    print("************* Data Preparation Test completed ************")
+
+if __name__ == "__main__":
+    test_data_preparation()
