@@ -1,5 +1,3 @@
-# data_config.py
-
 data = {
     'input_data_file_path': 'data/raw_input/concrete_data.csv',
     'columns': [

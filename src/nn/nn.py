@@ -1,26 +1,20 @@
-from dataclasses import dataclass
-from typing import List
-from config.activation_functions_enum import ActivationFunction
-from config.cost_functions_enum import CostFunction
-
-# Strongly-typed config for neural network
-@dataclass
-class NNConfig:
-    layer_sizes: List[int]
-    activation_functions: List[ActivationFunction]
-    error_function: CostFunction
 """
 Neural Network Forward Pass Implementation
 Contains classes for NeuralNetwork, Layer, and Neuron
 """
 
+from dataclasses import dataclass
+from typing import List
 import numpy as np
 import math
 from typing import List, Callable, Any
-from config.activation_functions_enum import ActivationFunction
-from config.cost_functions_enum import CostFunction
+from settings.enumerations import *
 
-
+@dataclass
+class NNConfig:
+    layer_sizes: List[int]
+    activation_functions: List[ActivationFunction]
+    error_function: CostFunction
 
 class Neuron:
     """
@@ -38,27 +32,20 @@ class Neuron:
         self.output = 0.0
         self.weighted_sum = 0.0
     
-    def forward(self, inputs: List[float], weights: List[float]) -> float:
+    def forward(self, inputs: List[float], weights: List[float], bias: float) -> float:
         """
         Perform forward pass for this neuron
-        
         Args:
             inputs: List of input values
-            weights: List of weights (first weight is bias, rest are input weights)
-            
+            weights: List of weights (no bias)
+            bias: Bias value for this neuron
         Returns:
             Activated output of the neuron
         """
-        # First weight is bias, rest are input weights
-        bias = weights[0]
-        input_weights = weights[1:]
-        
         # Calculate weighted sum: bias + sum(input_i * weight_i)
-        self.weighted_sum = bias + sum(inp * w for inp, w in zip(inputs, input_weights))
-        
+        self.weighted_sum = bias + sum(inp * w for inp, w in zip(inputs, weights))
         # Apply activation function
         self.output = self._apply_activation(self.weighted_sum)
-        
         return self.output
     
     def _apply_activation(self, x: float) -> float:
@@ -90,23 +77,20 @@ class Layer:
         self.neurons = [Neuron(activation_function) for _ in range(num_neurons)]
         self.outputs = []
     
-    def forward(self, inputs: List[float], weights: List[List[float]]) -> List[float]:
+    def forward(self, inputs: List[float], weights: List[List[float]], biases: List[float]) -> List[float]:
         """
         Perform forward pass for this layer
-        
         Args:
             inputs: List of input values to the layer
-            weights: List of weight lists, one for each neuron
-            
+            weights: List of weight lists (no bias), one for each neuron
+            biases: List of bias values, one for each neuron
         Returns:
             List of outputs from all neurons in the layer
         """
         self.outputs = []
-        
         for i, neuron in enumerate(self.neurons):
-            output = neuron.forward(inputs, weights[i])
+            output = neuron.forward(inputs, weights[i], biases[i])
             self.outputs.append(output)
-        
         return self.outputs
 
 class NeuralNetwork:
@@ -131,43 +115,38 @@ class NeuralNetwork:
     
     def forward_pass(self, 
                     weights: List[List[List[float]]], 
-                    input_vectors: List[List[float]], 
-                    target_outputs: List[float]) -> float:
+                    biases: List[List[float]],
+                    training_inputs: List[List[float]], 
+                    training_outputs: List[float]) -> float:
         """
         Perform forward pass and calculate total cost
-        
         Args:
-            weights: 3D list structure: [layer][neuron][weight] where first weight is bias
-            input_vectors: List of input vectors to process
-            target_outputs: List of expected outputs for each input vector
-            
+            weights: 3D list structure: [layer][neuron][input_weight] (no bias)
+            biases: 2D list structure: [layer][neuron]
+            training_inputs: List of input vectors to process
+            training_outputs: List of expected outputs for each input vector
         Returns:
             Total cost across all input vectors
         """
         total_cost = 0.0
         predictions = []
-        
-        for input_vector, target_output in zip(input_vectors, target_outputs):
+        for input_vector, target_output in zip(training_inputs, training_outputs):
             # Forward pass through the network
             current_inputs = input_vector
-            
             for layer_idx, layer in enumerate(self.layers):
                 layer_weights = weights[layer_idx]
-                current_inputs = layer.forward(current_inputs, layer_weights)
-            
+                layer_biases = biases[layer_idx]
+                current_inputs = layer.forward(current_inputs, layer_weights, layer_biases)
             # Get prediction (output of last layer)
             prediction = current_inputs[0] if len(current_inputs) == 1 else current_inputs
             predictions.append(prediction)
-            
-            
             # Calculate cost for this sample
             if isinstance(prediction, list):
                 cost = self._apply_cost_function(prediction, [target_output])
             else:
                 cost = self._apply_cost_function([prediction], [target_output])
-            
             total_cost += cost
-        return total_cost / len(input_vectors)
+        return total_cost / len(training_inputs)
     
     def _apply_cost_function(self, predictions: List[float], targets: List[float]) -> float:
         """Apply the cost function to predictions and targets"""

@@ -1,0 +1,2 @@
+WEIGHT = "weight"
+BIAS = "bias"

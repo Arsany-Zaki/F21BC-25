@@ -9,7 +9,7 @@ import numpy as np
 # Add the src directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from pso.pso import PSO, PSOParams
+from pso.pso import PSO, PSOConfig
 
 
 def simple_fitness(x):
@@ -23,13 +23,13 @@ def test_pso_bounds():
     
     # Test 1: Default configuration
     print("\n1. Testing default configuration:")
-    config1 = PSOParams()
+    config1 = PSOConfig()
     pso1 = PSO(config1)
     
     print(f"   Dims: {pso1.dims}")
-    print(f"   Bounds: {pso1.bounds}")
-    print(f"   Bounds min: {pso1.bounds_min}")
-    print(f"   Bounds max: {pso1.bounds_max}")
+    print(f"   Bounds: {pso1.boundaries}")
+    print(f"   Bounds min: {pso1.boundary_min}")
+    print(f"   Bounds max: {pso1.boundary_max}")
     
     best_pos1, best_fit1 = pso1.optimize(simple_fitness)
     print(f"   Best position: {best_pos1}")
@@ -38,9 +38,9 @@ def test_pso_bounds():
     # Test 2: Custom dimension-specific bounds
     print("\n2. Testing dimension-specific bounds:")
     custom_bounds = [(-1.0, 1.0), (-2.0, 3.0), (0.0, 5.0)]
-    config2 = PSOParams(
+    config2 = PSOConfig(
         dims=3,
-        bounds=custom_bounds,
+        boundaries=custom_bounds,
         swarm_size=20,
         max_iter=50
     )
@@ -48,9 +48,9 @@ def test_pso_bounds():
     pso2 = PSO(config2)
     
     print(f"   Dims: {pso2.dims}")
-    print(f"   Bounds: {pso2.bounds}")
-    print(f"   Bounds min: {pso2.bounds_min}")
-    print(f"   Bounds max: {pso2.bounds_max}")
+    print(f"   Bounds: {pso2.boundaries}")
+    print(f"   Bounds min: {pso2.boundary_min}")
+    print(f"   Bounds max: {pso2.boundary_max}")
     
     best_pos2, best_fit2 = pso2.optimize(simple_fitness)
     print(f"   Best position: {best_pos2}")

@@ -1,9 +1,9 @@
 # Imports
 import numpy as np
 from typing import Any, Dict
-from nn.generic_nn import NeuralNetwork, ActivationFunction, CostFunction
-from pso.pso import PSO, PSOParams
-from config.activation_boundaries_config import activation_boundaries
+from nn.nn import NeuralNetwork
+from pso.pso import PSO, PSOConfig
+from settings.activation_boundaries_settings import activation_boundaries
 
 # Main class
 class NNTrainerUsingPSO:
@@ -25,29 +25,78 @@ class NNTrainerUsingPSO:
 		)
 		# Set PSO boundaries based on NN topology and activations
 		boundaries = self._calculate_pso_feature_boundaries()
-		self.pso_params.bounds = boundaries
+		self.pso_params.boundary_min = [b[0] for b in boundaries]
+		self.pso_params.boundary_max = [b[1] for b in boundaries]
 		# Create PSO
 		self.pso = PSO(self.pso_params)
 		# Run PSO optimize
 		best_weights, best_fitness = self.pso.optimize(self.assess_fitness)
 		return best_weights, best_fitness
 
+	def train_nn_pyswarm_pso(self):
+		# Import pyswarm locally to avoid dependency if not used
+		from pyswarm import pso as pyswarm_pso
+		# Create neural network
+		self.nn = NeuralNetwork(
+			config=self.nn_params
+		)
+		# Set PSO boundaries based on NN topology and activations
+		boundaries = self._calculate_pso_feature_boundaries()
+		lb = [b[0] for b in boundaries]
+		ub = [b[1] for b in boundaries]
+		self.pso_params.boundary_min = lb
+		self.pso_params.boundary_max = ub
+		# Use pyswarm's pso optimizer
+		best_weights, best_fitness = pyswarm_pso(
+			self.assess_fitness,
+			lb,
+			ub,
+			phig=self.pso_params.c_global,
+			phip=self.pso_params.c_personal,
+			omega=self.pso_params.w_inertia,
+			swarmsize=self.pso_params.swarm_size
+		)
+		return best_weights, best_fitness
+
+	def train_nn_pyswarm_pso_default(self):
+		# Import pyswarm locally to avoid dependency if not used
+		from pyswarm import pso as pyswarm_pso
+		# Create neural network
+		self.nn = NeuralNetwork(
+			config=self.nn_params
+		)
+		# Set PSO boundaries based on NN topology and activations
+		boundaries = self._calculate_pso_feature_boundaries()
+		lb = [b[0] for b in boundaries]
+		ub = [b[1] for b in boundaries]
+		self.pso_params.boundary_min = lb
+		self.pso_params.boundary_max = ub
+		# Use pyswarm's pso optimizer
+		best_weights, best_fitness = pyswarm_pso(
+			self.assess_fitness,
+			lb,
+			ub
+		)
+		return best_weights, best_fitness
 	def assess_fitness(self, flat_weights: np.ndarray) -> float:
-		# Convert flat vector to NN weights structure
-		weights_struct = self._pso_vector_to_nn_weights(flat_weights)
+		# Convert flat vector to NN weights and biases structures
+		weights_struct, biases_struct = self._pso_vector_to_nn_weights(flat_weights)
 		# Run forward pass and return cost
 		cost = self.nn.forward_pass(
 			weights=weights_struct,
-			input_vectors=self.training_data['inputs'],
-			target_outputs=self.training_data['targets']
+			biases=biases_struct,
+			training_inputs=self.training_data['inputs'],
+			training_outputs=self.training_data['targets']
 		)
 		print(f"Fitness (cost) evaluated: {cost}")
 		return cost
 
 	def _pso_vector_to_nn_weights(self, flat_vector: np.ndarray):
 		"""
-		Convert a flat vector to the NN weights structure expected by NeuralNetwork.forward_pass:
-		[layer][neuron][weight] where first weight is bias, rest are input weights.
+		Convert a flat vector to separate NN weights and biases structures:
+		Returns (weights, biases) where:
+		- weights: [layer][neuron][input_weight]
+		- biases: [layer][neuron]
 		The flat vector is assumed to be ordered as:
 		- For each layer:
 			- For each input: all neurons' weights for that input (input-major order)
@@ -58,6 +107,7 @@ class NNTrainerUsingPSO:
 		"""
 		layer_sizes = self.nn_params.layer_sizes
 		weights_struct = []
+		biases_struct = []
 		idx = 0
 		for l in range(1, len(layer_sizes)):
 			n_inputs = layer_sizes[l-1]
@@ -70,13 +120,16 @@ class NNTrainerUsingPSO:
 			# Biases: one per neuron (neuron-major order)
 			biases = flat_vector[idx:idx+n_neurons].tolist()
 			idx += n_neurons
-			# Build neuron-wise weights: [bias, w1, w2, ...] for each neuron
+			# Build neuron-wise weights: [w1, w2, ...] for each neuron (no bias)
 			layer_weights = []
+			layer_biases = []
 			for n in range(n_neurons):
-				neuron_weights = [biases[n]] + [input_weights[i][n] for i in range(n_inputs)]
+				neuron_weights = [input_weights[i][n] for i in range(n_inputs)]
 				layer_weights.append(neuron_weights)
+				layer_biases.append(biases[n])
 			weights_struct.append(layer_weights)
-		return weights_struct
+			biases_struct.append(layer_biases)
+		return weights_struct, biases_struct
 
 	def _calculate_pso_feature_boundaries(self):
 		"""

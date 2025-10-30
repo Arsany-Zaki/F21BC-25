@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'config'))
 from config.data_config import data as data_cfg
 from config.output_config import output as output_cfg
-from utils.path_manager import normalize_path, ensure_directory_exists, join_paths
+from utilities.path_manager import normalize_path, ensure_directory_exists, join_paths
 from input_data_Processor.prepare_input_data import DataPreparator
 import pandas as pd
 from datetime import datetime

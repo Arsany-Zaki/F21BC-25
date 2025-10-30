@@ -1,62 +1,38 @@
+from .pso_config import PSOConfig
 import numpy as np
-from dataclasses import dataclass, field
-from typing import Optional, Callable, Tuple, List
-from enum import Enum
-
-from config.informant_selection_enum import InformantSelection
-from config.boundary_handling_enum import BoundaryHandling
-
-
-@dataclass
-class PSOParams:
-    # Swarm parameters
-    swarm_size: int
-    w_inertia: float  # inertia weight
-    c_personal: float  # personal best coefficient
-    c_social: float  # social best coefficient
-    c_global: float  # global best coefficient
-    jump_size: float
-
-    # Problem parameters
-    dims: int
-    bounds: List[Tuple[float, float]]
-    max_iter: int
-    target_fitness: Optional[float]
-    vel_limit: float
-    boundary_handling: BoundaryHandling
-    informant_selection: InformantSelection
-    informant_count: int
+from typing import Callable, Tuple
+from settings.enumerations import *
     
 class PSO:
-    def __init__(self, config: PSOParams):
+    def __init__(self, config: PSOConfig):
         self.config = config
         self.rng = np.random.RandomState()
 
         self.dims = config.dims
-        
-        # Copy bounds from config - expect valid configuration
-        self.bounds = config.bounds.copy()
-        self.bounds_min = np.array([bound[0] for bound in self.bounds])
-        self.bounds_max = np.array([bound[1] for bound in self.bounds])
-        self.bounds_range = self.bounds_max - self.bounds_min
-        self.vel_max = config.vel_limit * self.bounds_range
-        
+        # Use boundary_min and boundary_max from config
+        self.boundary_min = np.array(config.boundary_min)
+        self.boundary_max = np.array(config.boundary_max)
+        self.boundary_range = self.boundary_max - self.boundary_min
+        self.vel_max = np.abs(self.boundary_max - self.boundary_min)
+
         self._initialize_swarm()
     
     def _initialize_swarm(self):
-        self.positions = self.rng.uniform(self.bounds_min, self.bounds_max, size=(self.config.swarm_size, self.dims))
+        self.positions = self.rng.uniform(self.boundary_min, self.boundary_max, size=(self.config.swarm_size, self.dims))
         self.fitness = np.full(self.config.swarm_size, np.nan)
 
-        vel_range = 0.1 * self.bounds_range
-        self.velocities = self.rng.uniform(-vel_range, vel_range,size=(self.config.swarm_size, self.dims))
-        
+        # Match pyswarm: initial velocity in [-|ub-lb|, |ub-lb|]
+        vhigh = np.abs(self.boundary_max - self.boundary_min)
+        vlow = -vhigh
+        self.velocities = self.rng.uniform(vlow, vhigh, size=(self.config.swarm_size, self.dims))
+
         self.pbest_pos = self.positions.copy()
         self.pbest_fit = np.full(self.config.swarm_size, np.inf)
         self.sbest_pos = np.full((self.config.swarm_size, self.dims), np.nan)
-        self.sbest_fit = np.full(self.config.swarm_size, np.inf)        
+        self.sbest_fit = np.full(self.config.swarm_size, np.inf)
         self.gbest_pos = None
         self.gbest_fit = np.inf
-        
+
         self.informants = np.full((self.config.swarm_size, self.config.informant_count), np.nan, dtype=float)
     
     def _assess_fitness(self, fitness_func: Callable) -> None:
@@ -140,7 +116,7 @@ class PSO:
         r1 = self.rng.uniform(0.0, 1.0, size=(self.config.swarm_size, self.dims))
         r2 = self.rng.uniform(0.0, 1.0, size=(self.config.swarm_size, self.dims))
         r3 = self.rng.uniform(0.0, 1.0, size=(self.config.swarm_size, self.dims))
-        
+
         # Vectorized velocity update with correct PSO formula
         self.velocities = (
             self.config.w_inertia * self.velocities +
@@ -148,9 +124,7 @@ class PSO:
             r2 * self.config.c_social * (self.sbest_pos - self.positions) +
             r3 * self.config.c_global * (self.gbest_pos - self.positions)
         )
-        
-        # Apply velocity limits
-        self.velocities = np.clip(self.velocities, -self.vel_max, self.vel_max)
+        # No velocity clamping after initialization (match pyswarm)
     
     def _update_positions(self):
         self.positions += self.config.jump_size * self.velocities
@@ -159,15 +133,15 @@ class PSO:
     def _apply_boundary_strategy(self):
         if self.config.boundary_handling == BoundaryHandling.CLIP:
             # Vectorized clipping
-            self.positions = np.clip(self.positions, self.bounds_min, self.bounds_max)
+            self.positions = np.clip(self.positions, self.boundary_min, self.boundary_max)
             
         elif self.config.boundary_handling == BoundaryHandling.REFLECT:
             # Handle reflection for each particle individually
             for i in range(self.config.swarm_size):
                 for j in range(self.dims):
                     pos = self.positions[i, j]
-                    min_bound = self.bounds_min[j]
-                    max_bound = self.bounds_max[j]
+                    min_bound = self.boundary_min[j]
+                    max_bound = self.boundary_max[j]
                     
                     if pos < min_bound:
                         # Reflect below minimum
@@ -179,7 +153,7 @@ class PSO:
                         self.velocities[i, j] *= -1
             
             # Ensure reflected positions are still within bounds
-            self.positions = np.clip(self.positions, self.bounds_min, self.bounds_max)
+            self.positions = np.clip(self.positions, self.boundary_min, self.boundary_max)
     
     def _check_termination(self, iter_count: int) -> bool:
         """Check termination conditions."""
