@@ -31,8 +31,9 @@ def test_nn_forward_pass() -> None:
     nn_cost = nn.forward_pass(weights, biases, input_points, targets)
     correct_cost = cost()
 
-    print(f"Correct Cost: {correct_cost}")
-    print(f"NN Cost: {nn_cost}")
+    print(f"Calculated NN Cost  : {nn_cost}")
+    print(f"Correct Cost        : {correct_cost}")
+
     assert nn_cost == pytest.approx(correct_cost, rel=1e-2)
 
 def cost() -> float:

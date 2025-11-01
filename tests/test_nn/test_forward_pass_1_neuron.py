@@ -43,7 +43,8 @@ cost = nn.forward_pass(
     training_points_targets = targets
 )   
 
-print(f"Calculated cost: {cost}, Expected cost: {expected_cost}")
+print(f"Calculated cost : {cost}")
+print(f"Correct cost    : {expected_cost}")
 
 assert abs(cost - expected_cost) < 1e-6, f"Expected cost {expected_cost}, got {cost}"
 
