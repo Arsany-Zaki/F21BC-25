@@ -10,23 +10,23 @@ from settings.enumerations import ActivationFunction as act_func, CostFunction a
 
 nn_config = NNConfig(
     input_dim = 8,
-    layers_sizes = [8, 1],
-    activation_functions = [act_func.RELU, act_func.LINEAR],
+    layers_sizes = [16, 8, 1],
+    activation_functions = [act_func.RELU, act_func.RELU, act_func.LINEAR],
     cost_function = cost_func.MEAN_SQUARED_ERROR
 )
 pso_config = PSOConfig(
-    max_iter = 300,
-    swarm_size = 60,
-    informant_count = 20,
+    max_iter = 500,
+    swarm_size = 20,
+    informant_count = 10,
 
     boundary_handling = bound_handling.REFLECT,
     informant_selection = informant_selec.STATIC_RANDOM,
 
-    w_inertia = 0.73,
+    w_inertia = 1,
     c_personal = 1.0,
-    c_social = 1.0,
-    c_global = 1.0,
-    jump_size = 1.0,
+    c_social = 1.4,
+    c_global = 1.4,
+    jump_size = 1.4,
 
     dims = 8,                
     boundary_min = [],       
