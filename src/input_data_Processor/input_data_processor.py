@@ -6,6 +6,7 @@ import numpy as np
 
 class DataPreparator:
     def __init__(self, config: dict):
+        self.is_data_prepared: bool = False
         self.config = config
         log_level = self.config["output"]["log_level"]
         logging.getLogger(__name__).setLevel(getattr(logging, log_level.upper()))
@@ -65,22 +66,26 @@ class DataPreparator:
         return train_data, test_data
 
     def get_raw_input_data(self) -> pd.DataFrame:
-        if not hasattr(self, '_raw_input_data'):
-            raise ValueError("Raw input data not available. Call prepare_data_for_training() first.")
+        if not self.is_data_prepared:
+            self._prepare_data_for_training()
         return self._raw_input_data
+
     
     def get_normalized_input_data(self) -> pd.DataFrame:
-        if not hasattr(self, '_normalized_input_data'):
-            raise ValueError("Normalized input data not available. Call prepare_data_for_training() first.")
+        if not self.is_data_prepared:
+            self._prepare_data_for_training()
         return self._normalized_input_data
-    
+
     def get_normalized_input_data_split(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        if not hasattr(self, '_training_data') or not hasattr(self, '_testing_data'):
-            raise ValueError("Training/testing data not available. Call prepare_data_for_training() first.")
+        if not self.is_data_prepared:
+            self._prepare_data_for_training()
         return self._training_data, self._testing_data
 
-    def prepare_data_for_training(self):
+    def _prepare_data_for_training(self):
+        if(self.is_data_prepared): # for safety
+            return
         self._raw_input_data = self._read_input_data()
         self._normalized_input_data = self._normalize_input_data(self._raw_input_data)
         self._training_data, self._testing_data = self._split_data_to_training_testing(self._normalized_input_data)
+        self.is_data_prepared = True
         

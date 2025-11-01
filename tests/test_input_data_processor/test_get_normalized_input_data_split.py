@@ -1,15 +1,12 @@
 import sys
 import os
-# Add src directory to Python path to import modules
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
-# Add config directory to Python path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'config'))
-from config.data_config import data as data_cfg
-from config.output_config import output as output_cfg
+from settings.data_settings import data as data_cfg
+from settings.output_settings import output as output_cfg
 from utilities.path_manager import normalize_path, ensure_directory_exists, join_paths
-from input_data_Processor.prepare_input_data import DataPreparator
-import pandas as pd
+from input_data_Processor.input_data_processor import DataPreparator
 from datetime import datetime
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 def test_data_preparation():
     """Test the data preparation pipeline"""
@@ -17,7 +14,6 @@ def test_data_preparation():
     # Merge configs as expected by DataPreparator
     CONFIG = {"data": data_cfg, "output": output_cfg}
     data_preparator = DataPreparator(CONFIG)
-    data_preparator.prepare_data_for_training()
     raw_input_data = data_preparator.get_raw_input_data()
     normalized_input_data = data_preparator.get_normalized_input_data()
     training_data, testing_data = data_preparator.get_normalized_input_data_split()

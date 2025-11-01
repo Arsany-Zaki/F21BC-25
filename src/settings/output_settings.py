@@ -1,6 +1,5 @@
 output = {
-    'normalized_input_dir': 'data/normalized_input',
-    'test_output_dir': 'data/test_output',
+    'test_output_dir': 'logs/test_output',
     'log_level': 'INFO',
     'save_config_copy': True,
     'save_metrics': True,

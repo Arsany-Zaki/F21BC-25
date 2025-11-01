@@ -1,11 +1,9 @@
-# Imports
 import numpy as np
 from typing import Any, Dict
 from nn.nn import NeuralNetwork
 from pso.pso import PSO, PSOConfig
 from settings.activation_boundaries_settings import activation_boundaries
 
-# Main class
 class NNTrainerUsingPSO:
 	def __init__(self, training_data, exp_params: Dict[str, Any]):
 		"""
@@ -18,7 +16,7 @@ class NNTrainerUsingPSO:
 		self.nn = None
 		self.pso = None
 
-	def train_nn(self):
+	def train_nn_using_pso(self):
 		# Create neural network
 		self.nn = NeuralNetwork(
 			config=self.nn_params
@@ -31,9 +29,10 @@ class NNTrainerUsingPSO:
 		self.pso = PSO(self.pso_params)
 		# Run PSO optimize
 		best_weights, best_fitness = self.pso.optimize(self.assess_fitness)
+		print(f'Custom PSO completed. Best fitness: {best_fitness}')
 		return best_weights, best_fitness
 
-	def train_nn_pyswarm_pso(self):
+	def train_nn_using_pyswarm_pso(self):
 		# Import pyswarm locally to avoid dependency if not used
 		from pyswarm import pso as pyswarm_pso
 		# Create neural network
@@ -78,6 +77,7 @@ class NNTrainerUsingPSO:
 			ub
 		)
 		return best_weights, best_fitness
+
 	def assess_fitness(self, flat_weights: np.ndarray) -> float:
 		# Convert flat vector to NN weights and biases structures
 		weights_struct, biases_struct = self._pso_vector_to_nn_weights(flat_weights)
@@ -85,10 +85,10 @@ class NNTrainerUsingPSO:
 		cost = self.nn.forward_pass(
 			weights=weights_struct,
 			biases=biases_struct,
-			training_inputs=self.training_data['inputs'],
-			training_outputs=self.training_data['targets']
+			training_points=self.training_data['inputs'],
+			training_points_targets=self.training_data['targets']
 		)
-		print(f"Fitness (cost) evaluated: {cost}")
+		print(f'Fitness assessed: {cost}')
 		return cost
 
 	def _pso_vector_to_nn_weights(self, flat_vector: np.ndarray):
@@ -105,7 +105,7 @@ class NNTrainerUsingPSO:
 		flat_vector = [w_0_0, w_0_1, w_0_2, w_1_0, w_1_1, w_1_2, b_0, b_1, b_2]
 		where w_i_j is the weight from input i to neuron j, and b_j is the bias for neuron j.
 		"""
-		layer_sizes = self.nn_params.layer_sizes
+		layer_sizes = self.nn_params.layers_sizes
 		weights_struct = []
 		biases_struct = []
 		idx = 0
@@ -135,8 +135,8 @@ class NNTrainerUsingPSO:
 		"""
 		Use the instance's NN topology and activation functions to return a list of (lower, upper) tuples for each PSO feature (weight or bias), using boundaries from activation_boundaries_config.py.
 		"""
-		layer_sizes = self.nn_params.layer_sizes
-		activation_functions = self.nn_params.activation_functions
+		layer_sizes = self.nn_params.layers_sizes
+		activation_functions = self.nn_params.actication_functions
 		boundaries = []
 		for l in range(1, len(layer_sizes)):
 			n_inputs = layer_sizes[l-1]

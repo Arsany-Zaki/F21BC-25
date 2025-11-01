@@ -1,0 +1,1 @@
+$env:PYTHONPATH = "$(Resolve-Path ./src)"

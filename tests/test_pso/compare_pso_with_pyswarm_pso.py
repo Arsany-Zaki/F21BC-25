@@ -1,12 +1,9 @@
-MAX_ITER = 30
+MAX_ITER = 10
 SWARM_SIZE = 10
-EXP_SIZE = 100
+EXP_SIZE = 10
 
 import numpy as np
 from pyswarm import pso
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 from pso.pso import PSO
 from pso.pso_config import PSOConfig
 from settings.enumerations import BoundaryHandling, InformantSelection
