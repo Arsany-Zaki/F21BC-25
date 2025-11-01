@@ -21,7 +21,6 @@ class PSO:
         self.positions = self.rng.uniform(self.boundary_min, self.boundary_max, size=(self.config.swarm_size, self.dims))
         self.fitness = np.full(self.config.swarm_size, np.nan)
 
-        # Match pyswarm: initial velocity in [-|ub-lb|, |ub-lb|]
         vhigh = np.abs(self.boundary_max - self.boundary_min)
         vlow = -vhigh
         self.velocities = self.rng.uniform(vlow, vhigh, size=(self.config.swarm_size, self.dims))
@@ -124,7 +123,6 @@ class PSO:
             r2 * self.config.c_social * (self.sbest_pos - self.positions) +
             r3 * self.config.c_global * (self.gbest_pos - self.positions)
         )
-        # No velocity clamping after initialization (match pyswarm)
     
     def _update_positions(self):
         self.positions += self.config.jump_size * self.velocities

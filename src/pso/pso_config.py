@@ -20,4 +20,4 @@ class PSOConfig:
     dims: int
     boundary_min: List[float]
     boundary_max: List[float]
-    target_fitness: Optional[float]
+    target_fitness: float | None

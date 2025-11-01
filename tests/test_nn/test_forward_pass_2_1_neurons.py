@@ -28,13 +28,13 @@ def test_nn_forward_pass() -> None:
     nn = NeuralNetwork(config)
     weights = [weights_layer0, weights_layer1]
     biases = [biases_layer0, biases_layer1]
-    nn_cost = nn.forward_pass(weights, biases, input_points, targets)
-    correct_cost = cost()
+    expected_nn_cost = nn.forward_pass(weights, biases, input_points, targets)
+    actual_cost = cost()
 
-    print(f"Calculated NN Cost  : {nn_cost}")
-    print(f"Correct Cost        : {correct_cost}")
+    print(f"Expected NN Cost  : {expected_nn_cost}")
+    print(f"Actual Cost        : {actual_cost}")
 
-    assert nn_cost == pytest.approx(correct_cost, rel=1e-2)
+    assert expected_nn_cost == pytest.approx(actual_cost, rel=1e-2)
 
 def cost() -> float:
     nn_outputs = forward_pass_full_topology_all_points()

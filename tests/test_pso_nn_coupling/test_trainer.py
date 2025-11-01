@@ -8,39 +8,32 @@ from pso.pso import PSOConfig as PSOConfig
 from dataclasses import dataclass
 from settings.enumerations import ActivationFunction as act_func, CostFunction as cost_func, BoundaryHandling as bound_handling, InformantSelection as informant_selec
 
-@dataclass
-class TestCaseConfig:
-    nn: NNConfig
-    pso: PSOConfig
-    # add 'data' or other sections as needed
-
-test_case_config = TestCaseConfig(
-    nn=NNConfig(
-        input_dim = 8,
-        layers_sizes=[8, 1],
-        activation_functions=[act_func.RELU, act_func.LINEAR],
-        cost_function=cost_func.MEAN_SQUARED_ERROR
-    ),
-    pso=PSOConfig(
-        max_iter = 20,
-        swarm_size = 20,
-        informant_count = 5,
-
-        boundary_handling=bound_handling.REFLECT,
-        informant_selection=informant_selec.STATIC_RANDOM,
-
-        w_inertia = 0.73,
-        c_personal = 1.0,
-        c_social = 1.0,
-        c_global = 1.0,
-        jump_size = 1.0,
-
-        dims=8,                # to be set dynamically
-        boundary_min=[],       # to be set dynamically
-        boundary_max=[],       # to be set dynamically
-        target_fitness=None,   # not required
-    )
+nn_config = NNConfig(
+    input_dim = 8,
+    layers_sizes = [8, 1],
+    activation_functions = [act_func.RELU, act_func.LINEAR],
+    cost_function = cost_func.MEAN_SQUARED_ERROR
 )
+pso_config = PSOConfig(
+    max_iter = 300,
+    swarm_size = 60,
+    informant_count = 20,
+
+    boundary_handling = bound_handling.REFLECT,
+    informant_selection = informant_selec.STATIC_RANDOM,
+
+    w_inertia = 0.73,
+    c_personal = 1.0,
+    c_social = 1.0,
+    c_global = 1.0,
+    jump_size = 1.0,
+
+    dims = 8,                
+    boundary_min = [],       
+    boundary_max = [],       
+    target_fitness = None,
+)
+
 
 def test_nn_trainer_using_pso_runs():
 
@@ -57,13 +50,13 @@ def test_nn_trainer_using_pso_runs():
     training_data = {'inputs': X, 'targets': y}
     
     # Dynamically set PSOConfig.dims and boundary_min/boundary_max based on NN topology and activations
-    temp_trainer = NNTrainerUsingPSO(training_data, {'pso_params': test_case_config.pso, 'nn_params': test_case_config.nn})
+    temp_trainer = NNTrainerUsingPSO(training_data, pso_config, nn_config)
     boundaries = temp_trainer._calculate_pso_feature_boundaries()
-    test_case_config.pso.dims = len(boundaries)
-    test_case_config.pso.boundary_min = [b[0] for b in boundaries]
-    test_case_config.pso.boundary_max = [b[1] for b in boundaries]
+    pso_config.dims = len(boundaries)
+    pso_config.boundary_min = [b[0] for b in boundaries]
+    pso_config.boundary_max = [b[1] for b in boundaries]
 
-    trainer = NNTrainerUsingPSO(training_data, {'pso_params': test_case_config.pso, 'nn_params': test_case_config.nn})
+    trainer = NNTrainerUsingPSO(training_data, pso_config, nn_config)
     _, bestf_custom_pso = trainer.train_nn_using_pso()
     #_, bestf_pyswarm_pso = trainer.train_nn_using_pyswarm_pso()
     #_, bestf_pyswarm_pso_default = trainer.train_nn_pyswarm_pso_default()
