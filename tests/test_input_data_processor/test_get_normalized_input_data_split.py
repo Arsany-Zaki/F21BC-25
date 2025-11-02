@@ -3,7 +3,6 @@ import os
 from utilities.path_manager import normalize_path, ensure_directory_exists, join_paths
 from data_prep.data_prep import DataPrep
 from datetime import datetime
-from configs.paths import CONFIG
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 

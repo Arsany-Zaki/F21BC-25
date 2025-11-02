@@ -2,10 +2,10 @@ from __future__ import annotations
 from typing import List, Tuple
 import pandas as pd
 import numpy as np
-from configs.paths import PATHS
 from data_prep.data_prep_config import DataPrepConfig
 from configs.metadata import input_data_columns
 from configs.metadata import NormMethod
+from configs.paths import *
 
 class DataPrep:
     def __init__(self, config: DataPrepConfig):
@@ -13,7 +13,7 @@ class DataPrep:
         self.config: DataPrepConfig = config
 
     def _read_input_data(self) -> pd.DataFrame:
-        data_file_path: str = PATHS.data.raw_input_dir + PATHS.data.raw_input_file
+        data_file_path: str = PATH_RAW_INPUT_DIR + PATH_RAW_INPUT_FILE
         expected_columns: List[str] = list(input_data_columns.values())
         raw_data = pd.read_csv(data_file_path)
         raw_data.columns = expected_columns
