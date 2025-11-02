@@ -2,18 +2,18 @@ from __future__ import annotations
 from typing import List, Tuple
 import pandas as pd
 import numpy as np
+from configs.paths import PATHS
+from data_prep.data_prep_config import DataPrepConfig
 from configs.metadata import input_data_columns
-from configs.paths import CONFIG
-from configs.paths import DataConfig
 from configs.metadata import NormMethod
 
 class DataPrep:
-    def __init__(self, config: DataConfig):
+    def __init__(self, config: DataPrepConfig):
         self.is_data_prepared: bool = False
-        self.config: DataConfig = config
+        self.config: DataPrepConfig = config
 
     def _read_input_data(self) -> pd.DataFrame:
-        data_file_path: str = CONFIG.data.raw_input_dir + CONFIG.data.raw_input_file
+        data_file_path: str = PATHS.data.raw_input_dir + PATHS.data.raw_input_file
         expected_columns: List[str] = list(input_data_columns.values())
         raw_data = pd.read_csv(data_file_path)
         raw_data.columns = expected_columns

@@ -1,8 +1,8 @@
-from nn.nn import NeuralNetwork, NNConfig
+from nn.nn import NeuralNetwork
+from nn.nn_config import NNConfig
 from configs.metadata import ActFunc, CostFunc
 import pytest
 
-# nn topology with 2 neurons in hidden layer and 1 neuron in output layer
 config = NNConfig(
     input_dim = 3,
     layers_sizes = [2, 1],
@@ -31,8 +31,8 @@ def test_nn_forward_pass() -> None:
     expected_nn_cost = nn.forward_pass(weights, biases, input_points, targets)
     actual_cost = cost()
 
-    print(f"Expected NN Cost  : {expected_nn_cost}")
-    print(f"Actual Cost        : {actual_cost}")
+    print(f"Expected NN Cost : {expected_nn_cost}")
+    print(f"Actual Cost      : {actual_cost}")
 
     assert expected_nn_cost == pytest.approx(actual_cost, rel=1e-2)
 
