@@ -1,7 +1,0 @@
-PATH_RAW_INPUT_DIR      = 'data/raw_input/'
-PATH_RAW_INPUT_FILE     = 'Concrete_Data.csv'
-PATH_EXP_OUTPUT         = 'experiments/outputs/'
-PATH_EXP_CONFIG         = 'experiments/configs/'
-PATH_EXP_SCRIPT         = 'experiments/scripts/'
-PATH_RUNTIME_LOG        = 'logs/runtime/'
-PATH_TEST_OUTPUT        = 'logs/test_output/'

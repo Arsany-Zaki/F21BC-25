@@ -1,7 +1,7 @@
-from .pso_config import PSOConfig
+from .config_models import PSOConfig
 import numpy as np
 from typing import Callable, Tuple
-from configs.metadata import *
+from pso.constants import *
     
 class PSO:
     def __init__(self, config: PSOConfig):

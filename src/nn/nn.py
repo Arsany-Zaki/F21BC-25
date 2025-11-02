@@ -2,8 +2,8 @@ from typing import List
 import numpy as np
 import math
 from typing import List
-from configs.metadata import *
-from nn.nn_config import NNConfig
+from nn.constants import *
+from nn.config_models import NNConfig
 
 class Neuron:
     def __init__(self, activation_function: ActFunc):

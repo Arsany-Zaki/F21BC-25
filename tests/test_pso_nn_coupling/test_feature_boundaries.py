@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-from pso.pso_config import PSOConfig
+from pso.config_models import PSOConfig
 from nn.nn import NNConfig
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
-from configs.metadata import *
+from pso.constants import *
 
 # test case 2 layers (not including input layer) 
 # layer0 has 2 neurons, layer1 has 1 neurons

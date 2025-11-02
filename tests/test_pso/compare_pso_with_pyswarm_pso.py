@@ -5,8 +5,8 @@ EXP_SIZE = 10
 import numpy as np
 from pyswarm import pso
 from pso.pso import PSO
-from pso.pso_config import PSOConfig
-from configs.metadata import BoundHandling, InformantSelect
+from pso.config_models import PSOConfig
+from pso.constants import *
 from tabulate import tabulate
 
 # Define test functions and their known optima

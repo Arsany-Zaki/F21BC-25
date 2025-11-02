@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from configs.metadata import ActFunc, CostFunc
+from nn.constants import *
 
 @dataclass
 class NNConfig:

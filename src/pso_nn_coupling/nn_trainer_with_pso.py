@@ -1,8 +1,8 @@
-import numpy as np
-from typing import Any, Dict
 from nn.nn import NeuralNetwork
-from pso.pso import PSO, PSOConfig
-from configs.metadata import activation_boundary_weight, activation_boundary_bias
+import numpy as np
+from nn import *
+from pso.pso import PSO
+from nn.constants import *
 
 class Analytics:
 	fitness_calls_count: int = 0

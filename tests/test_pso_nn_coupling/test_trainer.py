@@ -1,14 +1,16 @@
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
 from pso.pso import PSOConfig
-from data_prep.data_prep import DataPrep
-from nn.nn_config import NNConfig
-from pso.pso_config import PSOConfig
-from data_prep.data_prep_config import DataPrepConfig
-from configs.metadata import *
+from data_prep.data_prep import *
+from nn.config_models import *
+from pso.config_models import *
+from data_prep.config_model import *
+from pso.constants import *
+from data_prep.constants import *
+from nn.constants import *
 
 data_config = DataPrepConfig(
     norm_method = NormMethod.ZSCORE,
-    norm_factors = norm_default_factors[NormMethod.ZSCORE]
+    norm_factors = NORM_DEFAULT_FACTORS[NormMethod.ZSCORE]
 )
 
 nn_config = NNConfig(

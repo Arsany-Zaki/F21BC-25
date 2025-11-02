@@ -3,6 +3,8 @@ import os
 from utilities.path_manager import normalize_path, ensure_directory_exists, join_paths
 from data_prep.data_prep import DataPrep
 from datetime import datetime
+from config.paths import *
+from data_prep.config_model import DataPrepConfig
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
@@ -10,7 +12,7 @@ def test_data_preparation():
     """Test the data preparation pipeline"""
     print("************* Data Preparation Test starts ************")
     # Merge configs as expected by DataPreparator
-    data_preparator = DataPrep(CONFIG.data)
+    data_preparator = DataPrep(DataPrepConfig())
     raw_input_data = data_preparator.get_raw_input_data()
     normalized_input_data = data_preparator.get_normalized_input_data()
     training_data, testing_data = data_preparator.get_normalized_input_data_split()
@@ -19,7 +21,7 @@ def test_data_preparation():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
     # Save data with timestamp in filenames
-    output_dir = normalize_path(CONFIG.test.output_dir)
+    output_dir = normalize_path(PATH_TEST_OUTPUT_DIR)
     ensure_directory_exists(output_dir)
     
     # Save raw data

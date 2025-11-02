@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, List
-from configs.metadata import *
-
+from typing import List
+from pso.constants import *
 
 @dataclass
 class PSOConfig:

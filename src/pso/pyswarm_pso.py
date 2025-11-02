@@ -1,4 +1,4 @@
-from .pso_config import PSOConfig
+from .config_models import PSOConfig
 from pyswarm import pso as pyswarm_pso
 
 class PySwarmPSO:

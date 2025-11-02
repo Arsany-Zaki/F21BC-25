@@ -1,6 +1,6 @@
 from nn.nn import NeuralNetwork
-from nn.nn_config import NNConfig
-from configs.metadata import ActFunc, CostFunc
+from nn.config_models import NNConfig
+from nn.constants import *
 import pytest
 
 config = NNConfig(

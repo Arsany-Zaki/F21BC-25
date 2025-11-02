@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-from pso.pso_config import PSOConfig
+from pso.config_models import PSOConfig
 from nn.nn import NNConfig
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
-from configs.metadata import ActFunc as act_func, CostFunc as cost_func, BoundHandling as bound_handling, InformantSelect as informant_selec
+from pso.constants import ActFunc, CostFunc, BoundHandling, InformantSelect
 
 # test case 2 layers (not including input layer) 
 # layer0 has 2 neurons, layer1 has 1 neurons
@@ -12,16 +12,16 @@ from configs.metadata import ActFunc as act_func, CostFunc as cost_func, BoundHa
 nn_config = NNConfig(
     input_dim = 3,
     layers_sizes = [2, 1],
-    activation_functions = [act_func.RELU, act_func.LINEAR],
-    cost_function = cost_func.MEAN_SQUARED_ERROR
+    activation_functions = [ActFunc.RELU, ActFunc.LINEAR],
+    cost_function = CostFunc.MEAN_SQUARED_ERROR
 )
 pso_config = PSOConfig(
     max_iter = 10,
     swarm_size = 10,
     informant_count = 2,
 
-    boundary_handling = bound_handling.REFLECT,
-    informant_selection = informant_selec.STATIC_RANDOM,
+    boundary_handling = BoundHandling.REFLECT,
+    informant_selection = InformantSelect.STATIC_RANDOM,
 
     w_inertia = 0.73,
     c_personal = 1.0,
