@@ -3,7 +3,7 @@ import pytest
 from pso.pso_config import PSOConfig
 from nn.nn import NNConfig
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
-from settings.enumerations import ActivationFunction as act_func, CostFunction as cost_func, BoundaryHandling as bound_handling, InformantSelection as informant_selec
+from configs.metadata import ActFunc as act_func, CostFunc as cost_func, BoundHandling as bound_handling, InformantSelect as informant_selec
 
 # test case 2 layers (not including input layer) 
 # layer0 has 2 neurons, layer1 has 1 neurons

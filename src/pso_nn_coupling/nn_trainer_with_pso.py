@@ -2,8 +2,7 @@ import numpy as np
 from typing import Any, Dict
 from nn.nn import NeuralNetwork
 from pso.pso import PSO, PSOConfig
-from settings.activation_boundaries_settings import activation_boundaries
-from settings.constants import *
+from configs.metadata import activation_boundary_weight, activation_boundary_bias
 
 class Analytics:
 	fitness_calls_count: int = 0
@@ -88,12 +87,14 @@ class NNTrainerUsingPSO:
 			training_points_targets=self.training_data['targets']
 		)
 		
-		self.analytics.fitness_calls_count += 1
-		self.analytics.last_x_fitness_calls_sum += cost
-		if(self.analytics.fitness_calls_count % 100 == 0):
-			print(f'Count: {self.analytics.fitness_calls_count} -> Fitness average: {self.analytics.last_x_fitness_calls_sum/100}')
-			self.analytics.last_x_fitness_calls_sum = 0
+		#self.analytics.fitness_calls_count += 1
+		#self.analytics.last_x_fitness_calls_sum += cost
+		#if(self.analytics.fitness_calls_count % 100 == 0):
+		#	print(f'Count: {self.analytics.fitness_calls_count} -> Fitness average: {self.analytics.last_x_fitness_calls_sum/100}')
+		#	self.analytics.last_x_fitness_calls_sum = 0
 		
+		self.analytics.fitness_calls_count += 1
+		print(f'{self.analytics.fitness_calls_count} -> fitness: {cost}')
 		return cost
 
 	def _pso_vector_to_nn_weights(self, flat_vector: np.ndarray
@@ -153,10 +154,8 @@ class NNTrainerUsingPSO:
 			n_inputs = full_layer_sizes[l-1]
 			n_neurons = full_layer_sizes[l]
 			act_fn = activation_functions[l-1]
-			# Use boundaries from config with enum as key
-			act_bounds = activation_boundaries[act_fn]
-			weight_bounds = act_bounds[Constants.WEIGHT]
-			bias_bounds = act_bounds[Constants.BIAS]
+			weight_bounds = activation_boundary_weight[act_fn]
+			bias_bounds = activation_boundary_bias[act_fn]
 			for _ in range(n_inputs * n_neurons):
 				boundaries.append(weight_bounds)
 			for _ in range(n_neurons):

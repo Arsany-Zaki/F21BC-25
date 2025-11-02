@@ -1,13 +1,13 @@
 from nn.nn import NeuralNetwork, NNConfig
-from settings.enumerations import ActivationFunction, CostFunction
+from configs.metadata import ActFunc, CostFunc
 
 
 # Configuration for a neural network with no hidden layers (input layer directly connected to output layer)
 config = NNConfig(
     input_dim = 3,
     layers_sizes = [1],
-    activation_functions = [ActivationFunction.LINEAR], 
-    cost_function = CostFunction.MEAN_SQUARED_ERROR
+    activation_functions = [ActFunc.LINEAR], 
+    cost_function = CostFunc.MEAN_SQUARED_ERROR
 )
 
 # Create the neural network

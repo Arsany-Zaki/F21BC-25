@@ -1,13 +1,13 @@
 from nn.nn import NeuralNetwork, NNConfig
-from settings.enumerations import ActivationFunction, CostFunction
+from configs.metadata import ActFunc, CostFunc
 import pytest
 
 # nn topology with 2 neurons in hidden layer and 1 neuron in output layer
 config = NNConfig(
     input_dim = 3,
     layers_sizes = [2, 1],
-    activation_functions = [ActivationFunction.RELU, ActivationFunction.LINEAR], 
-    cost_function = CostFunction.MEAN_SQUARED_ERROR
+    activation_functions = [ActFunc.RELU, ActFunc.LINEAR], 
+    cost_function = CostFunc.MEAN_SQUARED_ERROR
 )
 
 # Test case data
@@ -43,7 +43,7 @@ def cost() -> float:
 
 def cost_calculation(nn_outputs: list[float]) -> float:
     total_cost = 0.0
-    if(config.cost_function == CostFunction.MEAN_SQUARED_ERROR):
+    if(config.cost_function == CostFunc.MEAN_SQUARED_ERROR):
         for output, target in zip(nn_outputs, targets):
             total_cost += (output - target) ** 2
         return total_cost / len(targets)
@@ -55,17 +55,17 @@ def forward_pass_full_topology_all_points() -> list[float]:
 
 def forward_pass_topology(point) -> float:
     layer0_output = [
-        forward_pass_neuron(point, weights_layer0[0], biases_layer0[0], ActivationFunction.RELU),
-        forward_pass_neuron(point, weights_layer0[1], biases_layer0[1], ActivationFunction.RELU)
+        forward_pass_neuron(point, weights_layer0[0], biases_layer0[0], ActFunc.RELU),
+        forward_pass_neuron(point, weights_layer0[1], biases_layer0[1], ActFunc.RELU)
     ]
-    layer1_output = forward_pass_neuron(layer0_output, weights_layer1[0], biases_layer1[0], ActivationFunction.LINEAR)
+    layer1_output = forward_pass_neuron(layer0_output, weights_layer1[0], biases_layer1[0], ActFunc.LINEAR)
     return layer1_output
 
 def forward_pass_neuron(p, w, b, act) -> float:
     s = sum(wi * pi for wi, pi in zip(w, p)) + b
-    if act == ActivationFunction.RELU:
+    if act == ActFunc.RELU:
         return max(0, s)
-    elif act == ActivationFunction.LINEAR:
+    elif act == ActFunc.LINEAR:
         return s
     else:
         raise ValueError("Unsupported activation function for this test.")

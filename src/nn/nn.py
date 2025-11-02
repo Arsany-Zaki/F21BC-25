@@ -2,12 +2,11 @@ from typing import List
 import numpy as np
 import math
 from typing import List
-from settings.enumerations import *
+from configs.metadata import *
 from nn.nn_config import NNConfig
-from settings.enumerations import ActivationFunction, CostFunction
 
 class Neuron:
-    def __init__(self, activation_function: ActivationFunction):
+    def __init__(self, activation_function: ActFunc):
         self.activation_function = activation_function
         self.output = None
         self.weighted_sum = None
@@ -18,19 +17,19 @@ class Neuron:
         return self.output
     
     def _apply_activation(self, x: float) -> float:
-        if self.activation_function == ActivationFunction.SIGMOID:
+        if self.activation_function == ActFunc.SIGMOID:
             return 1.0 / (1.0 + math.exp(-np.clip(x, -500, 500)))
-        elif self.activation_function == ActivationFunction.RELU:
+        elif self.activation_function == ActFunc.RELU:
             return max(0.0, x)
-        elif self.activation_function == ActivationFunction.TANH:
+        elif self.activation_function == ActFunc.TANH:
             return math.tanh(x)
-        elif self.activation_function == ActivationFunction.LINEAR:
+        elif self.activation_function == ActFunc.LINEAR:
             return x
         else:
             raise ValueError(f"Unknown activation function: {self.activation_function}")
  
 class Layer:
-    def __init__(self, neurons_count: int, activation_function: ActivationFunction):
+    def __init__(self, neurons_count: int, activation_function: ActFunc):
         self.neurons = [Neuron(activation_function) for _ in range(neurons_count)]
         self.outputs = []
     
@@ -84,9 +83,9 @@ class NeuralNetwork:
         return total_cost
     
     def _apply_cost_function(self, predictions: List[float], targets: List[float]) -> float:
-        if self.cost_function == CostFunction.MEAN_SQUARED_ERROR:
+        if self.cost_function == CostFunc.MEAN_SQUARED_ERROR:
             return sum((p - t) ** 2 for p, t in zip(predictions, targets)) / len(targets)
-        elif self.cost_function == CostFunction.MEAN_ABSOLUTE_ERROR:
+        elif self.cost_function == CostFunc.MEAN_ABSOLUTE_ERROR:
             return sum(abs(p - t) for p, t in zip(predictions, targets)) / len(targets)
         else:
             raise ValueError(f"Unknown cost function: {self.cost_function}")

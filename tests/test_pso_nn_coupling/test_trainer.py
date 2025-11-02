@@ -1,32 +1,40 @@
-from settings.data_settings import data as data_cfg
-from settings.output_settings import output as output_cfg
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
 from pso.pso import PSOConfig
 from input_data_Processor.input_data_processor import DataPreparator
 from nn.nn import NNConfig
 from pso.pso import PSOConfig as PSOConfig
 from dataclasses import dataclass
-from settings.enumerations import ActivationFunction as act_func, CostFunction as cost_func, BoundaryHandling as bound_handling, InformantSelection as informant_selec
+from configs.metadata import ActFunc as act_func, CostFunc as cost_func, BoundHandling as bound_handling, InformantSelect as informant_selec
+from input_data_Processor.data_config import DataConfig
+
+from configs.metadata import NormMethod
+from configs.metadata import norm_default_factors
+from input_data_Processor.input_data_processor import DataPreparator
+
+data_config = DataConfig(
+    norm_method = NormMethod.ZSCORE,
+    norm_factors = norm_default_factors[NormMethod.ZSCORE]
+)
 
 nn_config = NNConfig(
     input_dim = 8,
-    layers_sizes = [16, 8, 1],
-    activation_functions = [act_func.RELU, act_func.RELU, act_func.LINEAR],
+    layers_sizes = [8, 1],
+    activation_functions = [act_func.RELU, act_func.LINEAR],
     cost_function = cost_func.MEAN_SQUARED_ERROR
 )
 pso_config = PSOConfig(
-    max_iter = 500,
-    swarm_size = 20,
-    informant_count = 10,
+    max_iter = 10,
+    swarm_size = 10,
+    informant_count = 2,
 
     boundary_handling = bound_handling.REFLECT,
-    informant_selection = informant_selec.STATIC_RANDOM,
+    informant_selection = informant_selec.SPATIAL_PROXIMITY,
 
-    w_inertia = 1,
+    w_inertia = 0.73,
     c_personal = 1.0,
-    c_social = 1.4,
-    c_global = 1.4,
-    jump_size = 1.4,
+    c_social = 1.0,
+    c_global = 1.0,
+    jump_size = 1.0,
 
     dims = 8,                
     boundary_min = [],       
@@ -34,14 +42,13 @@ pso_config = PSOConfig(
     target_fitness = None,
 )
 
-
 def test_nn_trainer_using_pso_runs():
 
     # Load config from Python files (nested structure)
-    config = {"data": data_cfg, "output": output_cfg}
+    #config = {"data": data_cfg, "output": output_cfg}
 
     # Prepare data
-    preparator = DataPreparator(config)
+    preparator = DataPreparator(data_config)
     train_df, _ = preparator.get_normalized_input_data_split()
 
     # Assume last column is target

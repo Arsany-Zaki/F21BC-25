@@ -6,7 +6,7 @@ import numpy as np
 from pyswarm import pso
 from pso.pso import PSO
 from pso.pso_config import PSOConfig
-from settings.enumerations import BoundaryHandling, InformantSelection
+from configs.metadata import BoundHandling, InformantSelect
 from tabulate import tabulate
 
 # Define test functions and their known optima
@@ -78,9 +78,9 @@ def custom_pso():
                 c_social=1.5,
                 c_global=0.5,
                 jump_size=1.0,
-                informant_selection=InformantSelection.STATIC_RANDOM,
+                informant_selection=InformantSelect.STATIC_RANDOM,
                 informant_count=2,
-                boundary_handling=BoundaryHandling.CLIP,
+                boundary_handling=BoundHandling.CLIP,
                 dims=len(f['lb']),
                 boundary_min=f['lb'],
                 boundary_max=f['ub'],

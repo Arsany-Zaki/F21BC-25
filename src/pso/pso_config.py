@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional, List
-from settings.enumerations import *
+from configs.metadata import *
 
 
 @dataclass
@@ -13,9 +13,9 @@ class PSOConfig:
     c_social: float     # informant influence
     c_global: float     # global best influence
     jump_size: float
-    informant_selection: InformantSelection
+    informant_selection: InformantSelect
     informant_count: int
-    boundary_handling: BoundaryHandling
+    boundary_handling: BoundHandling
 
     dims: int
     boundary_min: List[float]

@@ -1,7 +1,7 @@
 from .pso_config import PSOConfig
 import numpy as np
 from typing import Callable, Tuple
-from settings.enumerations import *
+from configs.metadata import *
     
 class PSO:
     def __init__(self, config: PSOConfig):
@@ -72,7 +72,7 @@ class PSO:
     def _update_informants(self):
         n_particles = self.config.swarm_size
         
-        if self.config.informant_selection == InformantSelection.STATIC_RANDOM:
+        if self.config.informant_selection == InformantSelect.STATIC_RANDOM:
             # Only set informants if they haven't been set yet (check if all elements are NaN)
             if np.isnan(self.informants).all():  # If all elements are NaN, none are initialized
                 for i in range(n_particles):
@@ -81,14 +81,14 @@ class PSO:
                     self.informants[i] = selected
             # If already set, don't change them (static behavior)
             
-        elif self.config.informant_selection == InformantSelection.DYNAMIC_RANDOM:
+        elif self.config.informant_selection == InformantSelect.DYNAMIC_RANDOM:
             # Always update informants for dynamic behavior
             for i in range(n_particles):
                 candidates = [j for j in range(n_particles) if j != i]
                 selected = self.rng.choice(candidates, size=self.config.informant_count, replace=False)
                 self.informants[i] = selected
                 
-        elif self.config.informant_selection == InformantSelection.SPATIAL_PROXIMITY:
+        elif self.config.informant_selection == InformantSelect.SPATIAL_PROXIMITY:
             # Always update informants based on current positions
             for i in range(n_particles):
                 # Calculate distances to all other particles
@@ -104,7 +104,7 @@ class PSO:
                 self.informants[i] = selected
         
         else:
-            supported_options = [e.value for e in InformantSelection]
+            supported_options = [e.value for e in InformantSelect]
             raise ValueError(
                 f"Unknown informant selection: {self.config.informant_selection}. "
                 f"Supported: {supported_options}"
@@ -129,11 +129,11 @@ class PSO:
         self._apply_boundary_strategy()
     
     def _apply_boundary_strategy(self):
-        if self.config.boundary_handling == BoundaryHandling.CLIP:
+        if self.config.boundary_handling == BoundHandling.CLIP:
             # Vectorized clipping
             self.positions = np.clip(self.positions, self.boundary_min, self.boundary_max)
             
-        elif self.config.boundary_handling == BoundaryHandling.REFLECT:
+        elif self.config.boundary_handling == BoundHandling.REFLECT:
             # Handle reflection for each particle individually
             for i in range(self.config.swarm_size):
                 for j in range(self.dims):

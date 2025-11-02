@@ -1,31 +1,30 @@
 from __future__ import annotations
 from typing import List, Tuple
-import logging
 import pandas as pd
 import numpy as np
+from configs.metadata import input_data_columns
+from configs.paths import CONFIG
+from configs.paths import DataConfig
+from configs.metadata import NormMethod
 
 class DataPreparator:
-    def __init__(self, config: dict):
+    def __init__(self, config: DataConfig):
         self.is_data_prepared: bool = False
-        self.config = config
-        log_level = self.config["output"]["log_level"]
-        logging.getLogger(__name__).setLevel(getattr(logging, log_level.upper()))
+        self.config: DataConfig = config
 
     def _read_input_data(self) -> pd.DataFrame:
-        data_file_path: str = self.config["data"]["input_data_file_path"]
-        expected_columns: List[str] = self.config["data"]["columns"]
+        data_file_path: str = CONFIG.data.raw_input_dir + CONFIG.data.raw_input_file
+        expected_columns: List[str] = list(input_data_columns.values())
         raw_data = pd.read_csv(data_file_path)
         raw_data.columns = expected_columns
         return raw_data
 
     def _normalize_input_data(self, raw_data: pd.DataFrame) -> pd.DataFrame:
-        normalization_method = str(self.config["data"]["normalisation_method"]).lower().strip()
-        logging.getLogger(__name__).info("Normalizing all columns")
         raw_data = raw_data.astype(float)
         normalized_data = raw_data.copy()
 
-        if normalization_method == "zscore":
-            target_mean, target_std = self.config["data"]["normalisation_zscore_params"]
+        if self.config.norm_method == NormMethod.ZSCORE:
+            target_mean, target_std = self.config.norm_factors
             target_mean = float(target_mean)
             target_std = float(target_std)
             means = raw_data.mean()
@@ -34,8 +33,8 @@ class DataPreparator:
             safe_stds = stds.copy()
             safe_stds[zero_var] = 1.0 # arbitrary non-zero value
             normalized_data.loc[:, raw_data.columns] = ((raw_data - means) / safe_stds) * target_std + target_mean
-        elif normalization_method == "minmax":
-            min_value, max_value = self.config["data"]["normalisation_minmax_params"]
+        elif self.config.norm_method == NormMethod.MINMAX:
+            min_value, max_value = self.config.norm_factors
             min_value = float(min_value)
             max_value = float(max_value)
             mins = raw_data.min()
@@ -47,11 +46,11 @@ class DataPreparator:
             scaled = (raw_data - mins) / safe_ranges
             normalized_data.loc[:, raw_data.columns] = scaled * (max_value - min_value) + min_value
         else:
-            raise ValueError(f"Unknown normalization method: {normalization_method}")
+            raise ValueError(f"Unknown normalization method: {self.config.norm_method}")
         return normalized_data
 
     def _split_data_to_training_testing(self, normalized_data: pd.DataFrame, seed: int = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        split_fraction = float(self.config["data"]["split_test_size"])
+        split_fraction = float(self.config.split_test_size)
         total_records = len(normalized_data)
         random_generator = np.random.RandomState(seed)
         indices = np.arange(total_records)
@@ -88,4 +87,3 @@ class DataPreparator:
         self._normalized_input_data = self._normalize_input_data(self._raw_input_data)
         self._training_data, self._testing_data = self._split_data_to_training_testing(self._normalized_input_data)
         self.is_data_prepared = True
-        

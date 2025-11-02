@@ -3,9 +3,7 @@ import pytest
 from pso.pso_config import PSOConfig
 from nn.nn import NNConfig
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
-from settings.enumerations import ActivationFunction as act_func, CostFunction as cost_func, BoundaryHandling as bound_handling, InformantSelection as informant_selec
-from settings.activation_boundaries_settings import activation_boundaries as act_bound
-from settings.constants import Constants as cons
+from configs.metadata import *
 
 # test case 2 layers (not including input layer) 
 # layer0 has 2 neurons, layer1 has 1 neurons
@@ -40,12 +38,12 @@ nn_config = NNConfig(
 
 act_funcs = nn_config.activation_functions
 
-bound_layer0_w_max = np.full(12, act_bound[act_funcs[0]][cons.WEIGHT][1])
-bound_layer0_b_max = np.full(4, act_bound[act_funcs[0]][cons.BIAS][1])
-bound_layer1_w_max = np.full(8, act_bound[act_funcs[1]][cons.WEIGHT][1])
-bound_layer1_b_max = np.full(2, act_bound[act_funcs[1]][cons.BIAS][1])
-bound_layer2_w_max = np.full(2, act_bound[act_funcs[2]][cons.WEIGHT][1])
-bound_layer2_b_max = np.full(1, act_bound[act_funcs[2]][cons.BIAS][1])
+bound_layer0_w_max = np.full(12, activation_boundary_weight[act_funcs[0]][1])
+bound_layer0_b_max = np.full(4, activation_boundary_bias[act_funcs[0]][1])
+bound_layer1_w_max = np.full(8, activation_boundary_weight[act_funcs[1]][1])
+bound_layer1_b_max = np.full(2, activation_boundary_bias[act_funcs[1]][1])
+bound_layer2_w_max = np.full(2, activation_boundary_weight[act_funcs[2]][1])
+bound_layer2_b_max = np.full(1, activation_boundary_bias[act_funcs[2]][1])
 
 bound_max = np.concatenate([
     bound_layer0_w_max,
@@ -56,12 +54,12 @@ bound_max = np.concatenate([
     bound_layer2_b_max
 ])
 
-bound_layer0_w_min = np.full(12, act_bound[act_funcs[0]][cons.WEIGHT][0])
-bound_layer0_b_min = np.full(4, act_bound[act_funcs[0]][cons.BIAS][0])
-bound_layer1_w_min = np.full(8, act_bound[act_funcs[1]][cons.WEIGHT][0])
-bound_layer1_b_min = np.full(2, act_bound[act_funcs[1]][cons.BIAS][0])
-bound_layer2_w_min = np.full(2, act_bound[act_funcs[2]][cons.WEIGHT][0])
-bound_layer2_b_min = np.full(1, act_bound[act_funcs[2]][cons.BIAS][0])
+bound_layer0_w_min = np.full(12, activation_boundary_weight[act_funcs[0]][0])
+bound_layer0_b_min = np.full(4, activation_boundary_bias[act_funcs[0]][0])
+bound_layer1_w_min = np.full(8, activation_boundary_weight[act_funcs[1]][0])
+bound_layer1_b_min = np.full(2, activation_boundary_bias[act_funcs[1]][0])
+bound_layer2_w_min = np.full(2, activation_boundary_weight[act_funcs[2]][0])
+bound_layer2_b_min = np.full(1, activation_boundary_bias[act_funcs[2]][0])
 
 bound_min = np.concatenate([
     bound_layer0_w_min,
