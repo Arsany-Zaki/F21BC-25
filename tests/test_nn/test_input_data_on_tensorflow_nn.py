@@ -1,5 +1,5 @@
 import tensorflow as tf
-from input_data_Processor.input_data_processor import DataPreparator
+from data_prep.data_prep import DataPrep
 
 # Example config (you should load or define this as needed for your project)
 CONFIG = {
@@ -16,7 +16,7 @@ CONFIG = {
 }
 
 # Prepare data
-preparator = DataPreparator(CONFIG)
+preparator = DataPrep(CONFIG)
 train_df, test_df = preparator.get_normalized_input_data_split()
 
 # Assume last column is the target

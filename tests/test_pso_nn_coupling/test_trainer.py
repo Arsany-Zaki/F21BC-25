@@ -1,17 +1,12 @@
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
 from pso.pso import PSOConfig
-from input_data_Processor.input_data_processor import DataPreparator
-from nn.nn import NNConfig
-from pso.pso import PSOConfig as PSOConfig
-from dataclasses import dataclass
-from configs.metadata import ActFunc as act_func, CostFunc as cost_func, BoundHandling as bound_handling, InformantSelect as informant_selec
-from input_data_Processor.data_config import DataConfig
+from data_prep.data_prep import DataPrep
+from nn.nn_config import NNConfig
+from pso.pso_config import PSOConfig
+from data_prep.data_prep_config import DataPrepConfig
+from configs.metadata import *
 
-from configs.metadata import NormMethod
-from configs.metadata import norm_default_factors
-from input_data_Processor.input_data_processor import DataPreparator
-
-data_config = DataConfig(
+data_config = DataPrepConfig(
     norm_method = NormMethod.ZSCORE,
     norm_factors = norm_default_factors[NormMethod.ZSCORE]
 )
@@ -19,16 +14,16 @@ data_config = DataConfig(
 nn_config = NNConfig(
     input_dim = 8,
     layers_sizes = [8, 1],
-    activation_functions = [act_func.RELU, act_func.LINEAR],
-    cost_function = cost_func.MEAN_SQUARED_ERROR
+    activation_functions = [ActFunc.RELU, ActFunc.LINEAR],
+    cost_function = CostFunc.MEAN_SQUARED_ERROR
 )
 pso_config = PSOConfig(
     max_iter = 10,
     swarm_size = 10,
     informant_count = 2,
 
-    boundary_handling = bound_handling.REFLECT,
-    informant_selection = informant_selec.SPATIAL_PROXIMITY,
+    boundary_handling = BoundHandling.REFLECT,
+    informant_selection = InformantSelect.SPATIAL_PROXIMITY,
 
     w_inertia = 0.73,
     c_personal = 1.0,
@@ -43,15 +38,10 @@ pso_config = PSOConfig(
 )
 
 def test_nn_trainer_using_pso_runs():
-
-    # Load config from Python files (nested structure)
-    #config = {"data": data_cfg, "output": output_cfg}
-
-    # Prepare data
-    preparator = DataPreparator(data_config)
+    preparator = DataPrep(data_config)
     train_df, _ = preparator.get_normalized_input_data_split()
 
-    # Assume last column is target
+    # Last column is target
     X = train_df.iloc[:, :-1].values.tolist()
     y = train_df.iloc[:, -1].values.tolist()
     training_data = {'inputs': X, 'targets': y}

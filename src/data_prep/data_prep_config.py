@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from configs.metadata import NormMethod
 
 @dataclass
-class DataConfig:
+class DataPrepConfig:
     norm_method: NormMethod
     norm_factors: list[float]
     split_test_size: float = 0.3    # Default to 30% test size

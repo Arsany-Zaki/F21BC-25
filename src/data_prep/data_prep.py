@@ -7,7 +7,7 @@ from configs.paths import CONFIG
 from configs.paths import DataConfig
 from configs.metadata import NormMethod
 
-class DataPreparator:
+class DataPrep:
     def __init__(self, config: DataConfig):
         self.is_data_prepared: bool = False
         self.config: DataConfig = config
