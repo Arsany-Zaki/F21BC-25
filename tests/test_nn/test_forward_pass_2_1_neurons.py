@@ -28,7 +28,7 @@ def test_nn_forward_pass() -> None:
     nn = NeuralNetwork(config)
     weights = [weights_layer0, weights_layer1]
     biases = [biases_layer0, biases_layer1]
-    expected_nn_cost = nn.forward_pass(weights, biases, input_points, targets)
+    expected_nn_cost = nn.get_cost_full_set(weights, biases, input_points, targets)
     actual_cost = cost()
 
     print(f"Expected NN Cost : {expected_nn_cost}")

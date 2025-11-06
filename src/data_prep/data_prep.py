@@ -2,87 +2,81 @@ from __future__ import annotations
 from typing import List, Tuple
 import pandas as pd
 import numpy as np
-from data_prep.config_model import DataPrepConfig
+from data_prep.input_data_models import DataPrepConfig
 from data_prep.constants import *
 from config.paths import *
+from data_prep.input_data_models import Point
 
 class DataPrep:
     def __init__(self, config: DataPrepConfig):
         self.is_data_prepared: bool = False
         self.config: DataPrepConfig = config
 
-    def _read_input_data(self) -> pd.DataFrame:
-        data_file_path: str = PATH_RAW_INPUT_DIR + PATH_RAW_INPUT_FILE
-        expected_columns: List[str] = list(INPUT_DATA_COLUMNS.values())
-        raw_data = pd.read_csv(data_file_path)
-        raw_data.columns = expected_columns
-        return raw_data
+    def get_normalized_input_data_split(self) -> Tuple[List[Point], List[Point]]:
+        if(not self.is_data_prepared):
+            self._prep_data()
+        return self._training_data, self._testing_data
+    
+    def get_normalized_input_data(self) -> List[Point]:
+        if(not self.is_data_prepared):
+            self._prep_data()
+        return self.normalized_data
 
-    def _normalize_input_data(self, raw_data: pd.DataFrame) -> pd.DataFrame:
-        raw_data = raw_data.astype(float)
-        normalized_data = raw_data.copy()
-
-        if self.config.norm_method == NormMethod.ZSCORE:
-            target_mean, target_std = self.config.norm_factors
-            target_mean = float(target_mean)
-            target_std = float(target_std)
-            means = raw_data.mean()
-            stds = raw_data.std()
-            zero_var = stds == 0.0 # to avoid division by zero
-            safe_stds = stds.copy()
-            safe_stds[zero_var] = 1.0 # arbitrary non-zero value
-            normalized_data.loc[:, raw_data.columns] = ((raw_data - means) / safe_stds) * target_std + target_mean
-        elif self.config.norm_method == NormMethod.MINMAX:
-            min_value, max_value = self.config.norm_factors
-            min_value = float(min_value)
-            max_value = float(max_value)
-            mins = raw_data.min()
-            maxs = raw_data.max()
-            ranges = maxs - mins
-            zero_range = ranges == 0.0 # to avoid division by zero
-            safe_ranges = ranges.copy()
-            safe_ranges[zero_range] = 1.0 # arbitrary non-zero value
-            scaled = (raw_data - mins) / safe_ranges
-            normalized_data.loc[:, raw_data.columns] = scaled * (max_value - min_value) + min_value
+    def _prep_data(self):
+        self._read_data()
+        self._normalize_data()
+        self._fill_in_points() # each point will have real and normalized values
+        self._split_data()
+        self.is_data_prepared = True
+    
+    def _read_data(self) -> List[List[float]]:
+        data_frame = pd.read_csv(RAW_INPUT_DIR + RAW_INPUT_FILE)
+        self.raw_data = data_frame.values.tolist()
+    
+    def _normalize_data(self) -> None:
+        if(self.config.norm_method == NormMethod.ZSCORE):
+            self._normalize_zscore()
+        elif(self.config.norm_method == NormMethod.MINMAX):
+            self._normalize_minmax()
         else:
             raise ValueError(f"Unknown normalization method: {self.config.norm_method}")
-        return normalized_data
-
-    def _split_data_to_training_testing(self, normalized_data: pd.DataFrame, seed: int = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        split_fraction = float(self.config.split_test_size)
-        total_records = len(normalized_data)
-        random_generator = np.random.RandomState(seed)
-        indices = np.arange(total_records)
-        random_generator.shuffle(indices)
-
-        num_test = int(round(total_records * split_fraction))
-        test_indices = indices[:num_test]
-        train_indices = indices[num_test:]
-
-        train_data = normalized_data.iloc[train_indices].reset_index(drop=True)
-        test_data = normalized_data.iloc[test_indices].reset_index(drop=True)
-        return train_data, test_data
-
-    def get_raw_input_data(self) -> pd.DataFrame:
-        if not self.is_data_prepared:
-            self._prepare_data_for_training()
-        return self._raw_input_data
-
     
-    def get_normalized_input_data(self) -> pd.DataFrame:
-        if not self.is_data_prepared:
-            self._prepare_data_for_training()
-        return self._normalized_input_data
+    def _normalize_zscore(self) -> None:
+        raw_np = np.array(self.raw_data)
+        mean = np.mean(raw_np, axis=0)
+        std = np.std(raw_np, axis=0)
+        zscore_mean = self.config.norm_factors[0]
+        zscore_std = self.config.norm_factors[1]
+        normalized_np = ((raw_np - mean) / std) * zscore_std + zscore_mean
+        self.normalized_data = normalized_np.tolist()
+        self.normalization_factors = mean, std
+        
+    def _normalize_minmax(self) -> None:
+        data_min = np.min(self.raw_data)
+        data_max = np.max(self.raw_data)
+        minmax_min = self.config.norm_factors[0]
+        minmax_max = self.config.norm_factors[1]
+        self.normalized_data = ((self.raw_data - data_min) / (data_max - data_min)) * (minmax_max - minmax_min) + minmax_min
+        self.normalization_factors = data_min, data_max
 
-    def get_normalized_input_data_split(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        if not self.is_data_prepared:
-            self._prepare_data_for_training()
-        return self._training_data, self._testing_data
+    def _fill_in_points(self) -> None:
+        self.points: List[Point] = []
+        for real, norm in zip(self.raw_data, self.normalized_data):
+            features_real = real[:-1]
+            target_real = real[-1]
+            features_norm = norm[:-1]
+            target_norm = norm[-1]
+            point = Point(
+                features_real_values=features_real,
+                target_real_value=target_real,
+                features_norm_values=features_norm,
+                target_norm_value=target_norm
+            )
+            self.points.append(point)
 
-    def _prepare_data_for_training(self):
-        if(self.is_data_prepared): # for safety
-            return
-        self._raw_input_data = self._read_input_data()
-        self._normalized_input_data = self._normalize_input_data(self._raw_input_data)
-        self._training_data, self._testing_data = self._split_data_to_training_testing(self._normalized_input_data)
-        self.is_data_prepared = True
+    def _split_data(self) -> None:
+        np.random.seed(self.config.random_seed)
+        np.random.shuffle(self.points)
+        split_index = int(len(self.points) * (1 - self.config.split_test_size))
+        self._training_data = self.points[:split_index]
+        self._testing_data = self.points[split_index:]

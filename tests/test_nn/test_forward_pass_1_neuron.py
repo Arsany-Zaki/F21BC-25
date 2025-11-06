@@ -21,7 +21,7 @@ targets = [1.0, 1.6, 0.0]
 neuron_output = [sum(w * f for w, f in zip(weights[0], features)) + biases[0] for features in input_points]
 actual_cost = sum((prediction - target) ** 2 for prediction, target in zip(neuron_output, targets)) / len(targets)
 
-expected_cost = nn.forward_pass(
+expected_cost = nn.get_cost_full_set(
     weights = [weights], 
     biases = [biases], 
     training_points = input_points,

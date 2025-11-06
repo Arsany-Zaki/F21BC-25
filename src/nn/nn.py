@@ -50,34 +50,37 @@ class NeuralNetwork:
         for i in range(0, len(config.layers_sizes)):
             layer = Layer(config.layers_sizes[i], config.activation_functions[i])
             self.layers.append(layer)
+
+    def _set_weights_and_biases(self, weights: List[List[List[float]]], biases: List[List[float]]) -> None:
+        self.weights = weights
+        self.biases = biases
+
+    def get_predictions_whole_set(self, weights: List[List[List[float]]], 
+            biases: List[List[float]], testing_points: List[List[float]]) -> np.ndarray:
+        self._set_weights_and_biases(weights, biases)
+        predictions = []
+        for testing_point in testing_points:
+            predictions.append(self._get_prediction_one_point(testing_point))
+        return np.array(predictions)
+
+    def _get_prediction_one_point(self, point: List[float]) -> float:
+        current_input = point
+        for layer_idx, layer in enumerate(self.layers):
+            layer_weights = self.weights[layer_idx]
+            layer_biases = self.biases[layer_idx]
+            current_input = layer._forward(current_input, layer_weights, layer_biases)
+        return current_input[0]  # Assuming single output neuron
     
-    def forward_pass(self, 
+    def get_cost_full_set(self, 
                     weights: List[List[List[float]]], 
                     biases: List[List[float]],
                     training_points: List[List[float]], 
                     training_points_targets: List[float]) -> float:
-        
-        '''
-        # Validation: print shapes of weights and biases for each layer
-        for layer_idx, layer in enumerate(self.layers):
-            layer_weights = weights[layer_idx]
-            layer_biases = biases[layer_idx]
-            print(f"Layer {layer_idx}: {len(layer.neurons)} neurons")
-            print(f"  Weights: {len(layer_weights)} (should match neurons)")
-            for n_idx, neuron_weights in enumerate(layer_weights):
-                print(f"    Neuron {n_idx} weights: {len(neuron_weights)}")
-            print(f"  Biases: {len(layer_biases)} (should match neurons)")
-        '''
-
+        self._set_weights_and_biases(weights, biases)
         total_cost = 0.0
         predictions = []
-        for training_point, _ in zip(training_points, training_points_targets):
-            current_input = training_point
-            for layer_idx, layer in enumerate(self.layers):
-                layer_weights = weights[layer_idx]
-                layer_biases = biases[layer_idx]
-                current_input = layer._forward(current_input, layer_weights, layer_biases)
-            prediction = current_input[0]  # Assuming single output neuron
+        for training_point, _ in zip(training_points, training_points_targets):            
+            prediction = self._get_prediction_one_point(training_point)
             predictions.append(prediction)
         total_cost = self._apply_cost_function(predictions, training_points_targets)
         return total_cost
