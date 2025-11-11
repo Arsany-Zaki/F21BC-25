@@ -3,14 +3,16 @@ import numpy as np
 from nn import *
 from pso.pso import PSO
 from nn.constants import *
+from data_prep.input_data_models import Point
+from typing import List
 
 class Analytics:
 	fitness_calls_count: int = 0
 	last_x_fitness_calls_sum: float = 0
 
 class NNTrainerUsingPSO:
-	def __init__(self, training_data, pso_config, nn_config):
-		self.training_data = training_data
+	def __init__(self, training_points: List[Point], pso_config, nn_config):
+		self.training_points = training_points
 		self.pso_config = pso_config
 		self.nn_config = nn_config
 		self.nn = None
@@ -19,18 +21,16 @@ class NNTrainerUsingPSO:
 
 	def train_nn_using_pso(self):
 		# Create neural network
-		self.nn = NeuralNetwork(
-			config=self.nn_config
-		)
+		self.nn = NeuralNetwork(config=self.nn_config)
 		# Set PSO boundaries based on NN topology and activations
-		boundaries = self._calculate_pso_feature_boundaries()
+		boundaries = self.calculate_pso_feature_boundaries()
+		self.pso_config.dims = len(boundaries)
 		self.pso_config.boundary_min = [b[0] for b in boundaries]
 		self.pso_config.boundary_max = [b[1] for b in boundaries]
 		# Create PSO
 		self.pso = PSO(self.pso_config)
 		# Run PSO optimize
 		best_position, best_fitness = self.pso.optimize(self._assess_fitness)
-		print(f'Custom PSO completed. Best fitness: {best_fitness}')
 		return best_position, best_fitness
 
 	def train_nn_using_pyswarm_pso(self):
@@ -39,7 +39,7 @@ class NNTrainerUsingPSO:
 		# Create neural network
 		self.nn = NeuralNetwork(config=self.nn_config)
 		# Set PSO boundaries based on NN topology and activations
-		boundaries = self._calculate_pso_feature_boundaries()
+		boundaries = self.calculate_pso_feature_boundaries()
 		lb = [b[0] for b in boundaries]
 		ub = [b[1] for b in boundaries]
 		self.pso_config.boundary_min = lb
@@ -62,7 +62,7 @@ class NNTrainerUsingPSO:
 		# Create neural network
 		self.nn = NeuralNetwork(config=self.nn_config)
 		# Set PSO boundaries based on NN topology and activations
-		boundaries = self._calculate_pso_feature_boundaries()
+		boundaries = self.calculate_pso_feature_boundaries()
 		lower_bounds = [b[0] for b in boundaries]
 		upper_bounds = [b[1] for b in boundaries]
 		self.pso_config.boundary_min = lower_bounds
@@ -72,18 +72,17 @@ class NNTrainerUsingPSO:
 		return best_weights, best_fitness
 
 	def _assess_fitness(self, flat_weights_and_biases: np.ndarray) -> float:
-		weights_struct, biases_struct = self._pso_vector_to_nn_weights_and_biases(flat_weights_and_biases)
-		cost = self.nn.get_cost_full_set(
+		weights_struct, biases_struct = self.pso_vector_to_nn_weights_and_biases(flat_weights_and_biases)
+		cost, _ = self.nn.forward_run_full_set(
 			weights=weights_struct,
 			biases=biases_struct,
-			training_points=self.training_data['inputs'],
-			training_points_targets=self.training_data['targets']
+			training_points=self.training_points
 		)
 		self.analytics.fitness_calls_count += 1
-		print(f'{self.analytics.fitness_calls_count} -> fitness: {cost}')
+		#print(f'{self.analytics.fitness_calls_count} -> fitness: {cost}')
 		return cost
 
-	def _pso_vector_to_nn_weights_and_biases(
+	def pso_vector_to_nn_weights_and_biases(
 			self, flat_vector: np.ndarray) -> tuple[list[list[list[float]]], list[list[float]]]:
 		layer_sizes = self.nn_config.layers_sizes
 		input_dim = self.nn_config.input_dim
@@ -113,7 +112,7 @@ class NNTrainerUsingPSO:
 			biases_struct.append(layer_biases)
 		return weights_struct, biases_struct
 
-	def _calculate_pso_feature_boundaries(self):
+	def calculate_pso_feature_boundaries(self):
 		layer_sizes = self.nn_config.layers_sizes
 		activation_functions = self.nn_config.activation_functions
 		input_dim = self.nn_config.input_dim

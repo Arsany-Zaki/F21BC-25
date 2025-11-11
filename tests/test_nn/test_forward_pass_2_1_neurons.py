@@ -1,6 +1,7 @@
 from nn.nn import NeuralNetwork
 from nn.config_models import NNConfig
 from nn.constants import *
+from data_prep.input_data_models import Point
 import pytest
 
 config = NNConfig(
@@ -11,12 +12,19 @@ config = NNConfig(
 )
 
 # Test case data
-input_points = [
+input_features = [
     [1.0, 0.6, 1.0], 
     [1.0, 1.0, 1.0], 
     [0.0, 0.0, 2.0]
 ]
 targets = [1.0, 1.2, 0.0]
+
+# Create Point objects for the new interface
+input_points = [
+    Point(features_real_values=feat, target_real_value=targ,
+          features_norm_values=feat, target_norm_value=targ)
+    for feat, targ in zip(input_features, targets)
+]
 
 weights_layer0 = [[0.1, 0.2, 0.3], [0.4, 0.5, 0.5]]
 biases_layer0 = [0.2, 0.1]
@@ -28,7 +36,7 @@ def test_nn_forward_pass() -> None:
     nn = NeuralNetwork(config)
     weights = [weights_layer0, weights_layer1]
     biases = [biases_layer0, biases_layer1]
-    expected_nn_cost = nn.get_cost_full_set(weights, biases, input_points, targets)
+    expected_nn_cost, predictions = nn.forward_run_full_set(weights, biases, input_points)
     actual_cost = cost()
 
     print(f"Expected NN Cost : {expected_nn_cost}")
@@ -51,7 +59,7 @@ def cost_calculation(nn_outputs: list[float]) -> float:
         raise ValueError("Unsupported cost function for this test.")
 
 def forward_pass_full_topology_all_points() -> list[float]:
-    return [forward_pass_topology(point) for point in input_points]
+    return [forward_pass_topology(point) for point in input_features]
 
 def forward_pass_topology(point) -> float:
     layer0_output = [

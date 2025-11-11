@@ -76,7 +76,7 @@ def test_feature_boundaries():
         pso_config = pso_config,
         nn_config = nn_config
     )
-    boundaries = trainer._calculate_pso_feature_boundaries()
+    boundaries = trainer.calculate_pso_feature_boundaries()
 
     all_min = np.array([b[0] for b in boundaries])
     all_max = np.array([b[1] for b in boundaries])

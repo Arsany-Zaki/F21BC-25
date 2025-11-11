@@ -4,6 +4,7 @@ import math
 from typing import List
 from nn.constants import *
 from nn.config_models import NNConfig
+from data_prep.input_data_models import Point
 
 class Neuron:
     def __init__(self, activation_function: ActFunc):
@@ -55,15 +56,7 @@ class NeuralNetwork:
         self.weights = weights
         self.biases = biases
 
-    def get_predictions_whole_set(self, weights: List[List[List[float]]], 
-            biases: List[List[float]], testing_points: List[List[float]]) -> np.ndarray:
-        self._set_weights_and_biases(weights, biases)
-        predictions = []
-        for testing_point in testing_points:
-            predictions.append(self._get_prediction_one_point(testing_point))
-        return np.array(predictions)
-
-    def _get_prediction_one_point(self, point: List[float]) -> float:
+    def _forward_run_one_point(self, point: List[float]) -> float:
         current_input = point
         for layer_idx, layer in enumerate(self.layers):
             layer_weights = self.weights[layer_idx]
@@ -71,19 +64,20 @@ class NeuralNetwork:
             current_input = layer._forward(current_input, layer_weights, layer_biases)
         return current_input[0]  # Assuming single output neuron
     
-    def get_cost_full_set(self, 
+    def forward_run_full_set(self, 
                     weights: List[List[List[float]]], 
                     biases: List[List[float]],
-                    training_points: List[List[float]], 
-                    training_points_targets: List[float]) -> float:
+                    training_points: List[Point]) -> tuple[float, np.ndarray]:
+        # Merged implementation - get predictions and calculate cost in one method
         self._set_weights_and_biases(weights, biases)
-        total_cost = 0.0
         predictions = []
-        for training_point, _ in zip(training_points, training_points_targets):            
-            prediction = self._get_prediction_one_point(training_point)
-            predictions.append(prediction)
-        total_cost = self._apply_cost_function(predictions, training_points_targets)
-        return total_cost
+        for point in training_points:
+            predictions.append(self._forward_run_one_point(point.features_norm_values))
+        
+        predictions_array = np.array(predictions)
+        targets = [point.target_norm_value for point in training_points]
+        total_cost = self._apply_cost_function(predictions, targets)
+        return total_cost, predictions_array
     
     def _apply_cost_function(self, predictions: List[float], targets: List[float]) -> float:
         if self.cost_function == CostFunc.MEAN_SQUARED_ERROR:

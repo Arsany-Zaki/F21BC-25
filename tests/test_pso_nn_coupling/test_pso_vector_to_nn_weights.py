@@ -55,7 +55,7 @@ def test_pso_vector_to_nn_weights():
         pso_config=pso_config,
         nn_config=nn_config
     )
-    weights_out, biases_out = trainer._pso_vector_to_nn_weights_and_biases(np.array(pso_vector))
+    weights_out, biases_out = trainer.pso_vector_to_nn_weights_and_biases(np.array(pso_vector))
 
     # Check weights
     for layer_idx in range(len(weights)):
