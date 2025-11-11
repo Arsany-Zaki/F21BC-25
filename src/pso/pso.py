@@ -1,10 +1,12 @@
-from .config_models import PSOConfig
+from .entities import PSOConfig
 import numpy as np
 from typing import Callable, Tuple
 from pso.constants import *
-    
+from pso.analytics import Analytics_PSO_Run
+
 class PSO:
     def __init__(self, config: PSOConfig):
+        self.analytics = Analytics_PSO_Run()
         self.config = config
         self.rng = np.random.RandomState()
 
@@ -176,6 +178,7 @@ class PSO:
             self._update_positions()
             
             iter_count += 1
+            self.analytics.add_global_best_fitness(self.gbest_fit)
         return self.gbest_pos.copy(), self.gbest_fit
     
     def get_swarm_state(self) -> dict:

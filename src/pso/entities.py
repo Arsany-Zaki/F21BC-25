@@ -20,3 +20,5 @@ class PSOConfig:
     boundary_min: List[float]
     boundary_max: List[float]
     target_fitness: float | None
+
+

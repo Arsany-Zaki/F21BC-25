@@ -1,4 +1,7 @@
-from .config_models import PSOConfig
+# Out-of-the-box PSO implementation from pyswarm library
+# Test the implemented PSO against this one for verification
+ 
+from .entities import PSOConfig
 from pyswarm import pso as pyswarm_pso
 
 class PySwarmPSO:

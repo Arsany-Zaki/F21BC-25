@@ -2,13 +2,17 @@ from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
 from pso.pso import PSOConfig
 from data_prep.data_prep import *
 from nn.nn import NeuralNetwork
-from nn.config_models import *
-from pso.config_models import *
+from nn.models import *
+from pso.entities import *
 from data_prep.input_data_models import *
 from pso.constants import *
 from data_prep.constants import *
 from nn.constants import *
+from config.paths import *
+from tabulate import tabulate
 import csv
+import config.global_config as gc
+import time
 
 # Input data normalization configuration
 data_config = DataPrepConfig(
@@ -24,18 +28,22 @@ nn_config = NNConfig(
 )
 # PSO configuration
 pso_config = PSOConfig(
-    max_iter = 20,
+    max_iter = 10,
     swarm_size = 10,
     informant_count = 2,
+
+    #max_iter = 20,
+    #swarm_size = 10,
+    #informant_count = 2,
 
     boundary_handling = BoundHandling.REFLECT,
     informant_selection = InformantSelect.STATIC_RANDOM,
 
-    w_inertia = 0.5,
+    w_inertia = 0.6,
 
-    c_personal = 1.3,
-    c_social = 1.3,
-    c_global = 1.3,
+    c_personal = 1.4,
+    c_social = 1.4,
+    c_global = 1.4,
 
     jump_size = 1.0,
     dims = 8,                
@@ -45,6 +53,7 @@ pso_config = PSOConfig(
 )
 
 def main():
+    gc.GC_DEBUG_MODE = True
     # Read data from file and prepare it (normalize and split into training and testing sets)
     print("Get normalized input data split...", end="\n\n")
     data_prep = DataPrep(data_config)
@@ -95,39 +104,82 @@ def main():
     write_targets_and_predictions(
         testing_points, 
         nn_predictions_real_vals, 
-        TEST_OUTPUT_DIR + "predictions_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
+        PATH_TEST_OUTPUT_DIR + "predictions_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
     )
 
 def _print_standard_evaluation_metrics(msg, mse, rmse, mae):
-    print(f"***** {msg}")
-    print(f"- MSE  : {mse}")
-    print(f"- RMSE : {rmse}")
-    print(f"- MAE  : {mae}")
+    # Simple text header
+    print(f"{msg}")
+    
+    # Create the metrics table
+    table_data = [
+        ["MSE", f"{mse:.6f}"],
+        ["RMSE", f"{rmse:.6f}"],
+        ["MAE", f"{mae:.6f}"]
+    ]
+    print(tabulate(table_data, headers=["Metric", "Value"], tablefmt="fancy_grid"))
     print()
 
 def _print_comparison_metrics(coefficient_of_realization, generalization_ratio):
-    print("***** Model Performance Comparison")
-    print(f"- Coefficient of Realization : {coefficient_of_realization:.4f}")
-    print(f"- Generalization Ratio       : {generalization_ratio:.4f}")
+    # Simple text header
+    print("Model Performance Comparison")
+    
+    table_data = [
+        ["Coefficient of Realization", f"{coefficient_of_realization:.4f}"],
+        ["Generalization Ratio", f"{generalization_ratio:.4f}"]
+    ]
+    print(tabulate(table_data, headers=["Metric", "Value"], tablefmt="fancy_grid"))
     print()
 
 def _print_all_configs():
-    print("***** Configuration Settings")
-    print("- Data Preparation Config:")
-    print(data_config)
+    # Data Preparation Config
+    print("Data Preparation Configuration")
+    data_table = [
+        ["Normalization Method", data_config.norm_method.value],
+        ["Normalization Factors", str(data_config.norm_factors)],
+        ["Test Split Size", f"{data_config.split_test_size}"],
+        ["Random Seed", f"{data_config.random_seed}"]
+    ]
+    print(tabulate(data_table, headers=["Parameter", "Value"], tablefmt="fancy_grid"))
     print()
-    print("- Neural Network Config:")
-    print(nn_config)
+
+    # Neural Network Config
+    print("Neural Network Configuration")
+    nn_table = [
+        ["Input Dimensions", f"{nn_config.input_dim}"],
+        ["Layer Sizes", str(nn_config.layers_sizes)],
+        ["Activation Functions", str([af.value for af in nn_config.activation_functions])],
+        ["Cost Function", nn_config.cost_function.value]
+    ]
+    print(tabulate(nn_table, headers=["Parameter", "Value"], tablefmt="fancy_grid"))
     print()
-    print("- PSO Config:")
-    print(pso_config)
+
+    # PSO Config
+    print("PSO Configuration")
+    pso_table = [
+        ["Max Iterations", f"{pso_config.max_iter}"],
+        ["Swarm Size", f"{pso_config.swarm_size}"],
+        ["Inertia Weight", f"{pso_config.w_inertia}"],
+        ["Personal Coefficient", f"{pso_config.c_personal}"],
+        ["Social Coefficient", f"{pso_config.c_social}"],
+        ["Global Coefficient", f"{pso_config.c_global}"],
+        ["Informant Selection", pso_config.informant_selection.value],
+        ["Informant Count", f"{pso_config.informant_count}"],
+        ["Boundary Handling", pso_config.boundary_handling.value]
+    ]
+    print(tabulate(pso_table, headers=["Parameter", "Value"], tablefmt="fancy_grid"))
     print()
 
 def _print_evaluation_metrics_on_norm_data(best_training_cost, test_cost):
-    print("***** Evaluation Metrics on Normalized Data")
-    print(f"- Cost function is   : {nn_config.cost_function}")
-    print(f"- Best training cost : {best_training_cost}")
-    print(f"- Test cost          : {test_cost}")
+    # Simple text header
+    print("Evaluation Metrics on Normalized Data")
+    
+    table_data = [
+        ["Cost Function", nn_config.cost_function.value],
+        ["Best Training Cost", f"{best_training_cost:.6f}"],
+        ["Test Cost", f"{test_cost:.6f}"]
+    ]
+    print(tabulate(table_data, headers=["Metric", "Value"], tablefmt="fancy_grid"))
     print()
 
 def write_targets_and_predictions(points, predictions, filename):
@@ -138,8 +190,6 @@ def write_targets_and_predictions(points, predictions, filename):
             writer.writerow([point.target_real_value, pred])
 
 if __name__ == "__main__":
-    import time
-    t0 = time.time()
     main()
-    t1 = time.time()
-    print(f"Elapsed time: {t1 - t0}")
+    
+    

@@ -30,7 +30,7 @@ class DataPrep:
         self.is_data_prepared = True
     
     def _read_data(self) -> List[List[float]]:
-        data_frame = pd.read_csv(RAW_INPUT_DIR + RAW_INPUT_FILE)
+        data_frame = pd.read_csv(PATH_RAW_INPUT_DIR + PATH_RAW_INPUT_FILE)
         self.raw_data = data_frame.values.tolist()
     
     def _normalize_data(self) -> None:

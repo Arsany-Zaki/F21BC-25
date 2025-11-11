@@ -3,7 +3,7 @@ import numpy as np
 import math
 from typing import List
 from nn.constants import *
-from nn.config_models import NNConfig
+from nn.models import NNConfig
 from data_prep.input_data_models import Point
 
 class Neuron:

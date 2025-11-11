@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from pso.config_models import PSOConfig
+from pso.entities import PSOConfig
 from nn.nn import NNConfig
 from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
 from pso.constants import *

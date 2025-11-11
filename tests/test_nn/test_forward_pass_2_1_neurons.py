@@ -1,5 +1,5 @@
 from nn.nn import NeuralNetwork
-from nn.config_models import NNConfig
+from nn.models import NNConfig
 from nn.constants import *
 from data_prep.input_data_models import Point
 import pytest

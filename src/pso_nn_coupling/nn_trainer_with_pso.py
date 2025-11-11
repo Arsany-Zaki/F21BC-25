@@ -6,10 +6,6 @@ from nn.constants import *
 from data_prep.input_data_models import Point
 from typing import List
 
-class Analytics:
-	fitness_calls_count: int = 0
-	last_x_fitness_calls_sum: float = 0
-
 class NNTrainerUsingPSO:
 	def __init__(self, training_points: List[Point], pso_config, nn_config):
 		self.training_points = training_points
@@ -17,7 +13,6 @@ class NNTrainerUsingPSO:
 		self.nn_config = nn_config
 		self.nn = None
 		self.pso = None
-		self.analytics = Analytics()
 
 	def train_nn_using_pso(self):
 		# Create neural network
@@ -78,8 +73,6 @@ class NNTrainerUsingPSO:
 			biases=biases_struct,
 			training_points=self.training_points
 		)
-		self.analytics.fitness_calls_count += 1
-		#print(f'{self.analytics.fitness_calls_count} -> fitness: {cost}')
 		return cost
 
 	def pso_vector_to_nn_weights_and_biases(

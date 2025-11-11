@@ -5,7 +5,7 @@ EXP_SIZE = 10
 import numpy as np
 from pyswarm import pso
 from pso.pso import PSO
-from pso.config_models import PSOConfig
+from pso.entities import PSOConfig
 from pso.constants import *
 from tabulate import tabulate
 
