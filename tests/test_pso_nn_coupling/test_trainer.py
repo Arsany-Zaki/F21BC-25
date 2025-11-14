@@ -2,7 +2,7 @@ from pso_nn_coupling.nn_trainer_with_pso import NNTrainerUsingPSO
 from pso.pso import PSOConfig
 from data_prep.data_prep import *
 from nn.nn import NeuralNetwork
-from nn.models import *
+from nn.entities import *
 from pso.entities import *
 from data_prep.input_data_models import *
 from pso.constants import *

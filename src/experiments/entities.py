@@ -1,18 +1,27 @@
 from dataclasses import dataclass
-from nn.nn import NNConfig
-from pso.pso import PSOConfig
-from exp_analysis import ExpAnalysis
+
 
 @dataclass
-class ExpConfig:
-    nn_config: NNConfig
-    pso_config: PSOConfig
-    exp_analysis: ExpAnalysis
+class ExpGroupConfig_VelCoeffs:
+    # ranges are (min, max, step)
+    inertia_range: tuple[float, float, float]
+    personal_range: tuple[float, float, float]
+    global_range: tuple[float, float, float]
+    social_range: tuple[float, float, float]
 
 @dataclass
-class ExpAnalysis:
-    experiment_name: str
-    run_count: int
-    best_fitnesses: list[float]
-    training_times: list[float]
-    
+class ExpConfig_VelCoeffs:
+    inertia: float
+    personal: float
+    global_: float
+    social: float
+
+@dataclass
+class ExpGroupConfig_FitnessBudget:
+    fitness_budget: int
+    swarm_size_range: tuple[int, int, int] # ranges are (min, max, step)
+
+@dataclass
+class ExpConfig_FitnessBudget:
+    swarm_size: int
+    iterations_count: int
